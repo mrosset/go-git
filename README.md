@@ -1,7 +1,7 @@
 go-git
 =============
 
-go-git go bindings to [libgit2](http://libgit2.github.com/)
+Go bindings to [libgit2](http://libgit2.github.com/)
 
 Status
 -------
