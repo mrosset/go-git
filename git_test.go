@@ -12,84 +12,59 @@ var (
 	repo    *Repo
 	revwalk *RevWalk
 	path    string
-	fatal   bool = false
-	calls   int  = 0
+	calls   int = 0
 )
 
 func init() {
-	path, _ = os.Getwd()
-	path += "/tmp"
+	//path, _ = os.Getwd()
+	path = "/mnt/data/tmp"
 	repo = &Repo{}
 }
 
 func TestInit(t *testing.T) {
-	if fatal {
-		return
-	}
-	if err := repo.Init(path, NOTBARE); err != nil {
-		fatal = true
-		t.Error(err)
+	if err := repo.Init(path, BARE); err != nil {
+		t.Fatal("Error:", err)
 	}
 }
 
 func TestOpen(t *testing.T) {
-	if fatal {
-		return
-	}
-	err := repo.Open(path + "/.git")
+	err := repo.Open(path)
 	if err != nil {
-		fatal = true
-		println("We can not test with out a working Repo")
-		println(err.String())
+		t.Fatal("Error:", err)
 	}
 }
 
 func TestNewOid(t *testing.T) {
-	if fatal {
-		return
-	}
 	if _, err := NewOid(oid); err != nil {
-		fatal = true
 		t.Error(err)
 	}
 }
 
 /*
 func TestLookup(t *testing.T) {
-	if fatal {
-		return
-	}
 	c := &Commit{}
 	o, _ := NewOid(oid)
 	repo.Lookup(c, o, GIT_OBJ_ANY)
 	if c.Author() != author {
-		fatal = true
-		t.Error(os.NewError("Lookup failed"))
+		t.Fatal("ERROR:",os.NewError("Lookup failed"))
 	}
 }
 */
+
 func TestNewRevWalk(t *testing.T) {
 	var err os.Error
-	if fatal {
-		return
-	}
 	revwalk, err = NewRevWalk(repo)
 	if err != nil {
-		fatal = true
-		t.Error(err)
+		t.Fatal("ERROR:", err)
 	}
 }
 
 //Important: this must be called after all of the Test functions
 func TestFinal(t *testing.T) {
-	if fatal {
-		return
-	}
 	revwalk.Free()
 	repo.Free()
 }
 
 func TestTest(t *testing.T) {
-
 	test()
 }

@@ -20,8 +20,9 @@ type Repo struct {
 }
 
 func (v *Repo) Open(path string) (err os.Error) {
-	if C.git_repository_open(&v.git_repo, C.CString(path)) != 0 {
-		err = os.NewError("failed to open " + path)
+	ecode := C.git_repository_open(&v.git_repo, C.CString(path))
+	if ecode != 0 {
+		err = os.NewError(fmt.Sprintf("failed to open %v CODE %v", path, ecode))
 	}
 	return
 }
@@ -35,8 +36,9 @@ func (v *Repo) Free() {
 }
 
 func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
-	if i := C.git_repository_init(&v.git_repo, C.CString(path), C.uint(isbare)); i != 0 {
-		e := fmt.Sprintf("failed to init %v CODE %v", path, i)
+	ecode := C.git_repository_init(&v.git_repo, C.CString(path), C.uint(isbare))
+	if ecode != 0 {
+		e := fmt.Sprintf("failed to init %v CODE %v", path, ecode)
 		println(e)
 		return os.NewError(e)
 	}
