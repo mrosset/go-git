@@ -14,10 +14,8 @@ CLEANFILES+=defs.go
 
 include $(GOROOT)/src/Make.pkg
 
-defs.go: git_defs.c
-	godefs -g git git_defs.c > defs.go
+defs.go: defs.c
+	godefs -g git defs.c > defs.go
 
 format:
 	gofmt -l -w *.go
-
-all: format test defs.go

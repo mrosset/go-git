@@ -54,6 +54,7 @@ func TestNewOid(t *testing.T) {
 	}
 }
 
+/*
 func TestLookup(t *testing.T) {
 	if fatal {
 		return
@@ -66,7 +67,7 @@ func TestLookup(t *testing.T) {
 		t.Error(os.NewError("Lookup failed"))
 	}
 }
-
+*/
 func TestNewRevWalk(t *testing.T) {
 	var err os.Error
 	if fatal {

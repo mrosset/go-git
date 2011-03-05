@@ -27,7 +27,7 @@ func (v *Repo) Open(path string) (err os.Error) {
 }
 
 func (v *Repo) Lookup(c *Commit, o *Oid, mask int) {
-	C.git_repository_lookup(&c.git_commit, v.git_repo, o.git_oid, (C.git_otype)(mask))
+	//C.git_repository_lookup(&c.git_commit, v.git_repo, o.git_oid, (C.git_otype)(mask))
 }
 
 func (v *Repo) Free() {
