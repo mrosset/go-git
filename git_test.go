@@ -16,8 +16,8 @@ var (
 )
 
 func init() {
-	//path, _ = os.Getwd()
-	path = "/mnt/data/tmp"
+	path, _ = os.Getwd()
+	path = "/tmp"
 	repo = &Repo{}
 }
 
