@@ -21,7 +21,7 @@ type Repo struct {
 
 func (v *Repo) Open(path string) (err os.Error) {
 	ecode := C.git_repository_open(&v.git_repo, C.CString(path))
-	if ecode != 0 {
+	if ecode != GIT_SUCCESS {
 		err = os.NewError(fmt.Sprintf("failed to open %v CODE %v", path, ecode))
 	}
 	return
@@ -37,7 +37,7 @@ func (v *Repo) Free() {
 
 func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
 	ecode := C.git_repository_init(&v.git_repo, C.CString(path), C.uint(isbare))
-	if ecode != 0 {
+	if ecode != GIT_SUCCESS {
 		e := fmt.Sprintf("failed to init %v CODE %v", path, ecode)
 		println(e)
 		return os.NewError(e)
@@ -111,11 +111,28 @@ func (v *RevWalk) Free() {
 	C.git_revwalk_free(v.git_revwalk)
 }
 
-func test() {
-	printT(BARE)
-	printT(NOTBARE)
+//Reference
+
+type Reference struct {
+	git_reference *C.git_reference
 }
+
+func (v *Reference) Lookup(r *Repo, name string) (err os.Error) {
+	ecode := C.git_reference_lookup(&v.git_reference, r.git_repo, C.CString(name))
+	if ecode != GIT_SUCCESS {
+		err = os.NewError(fmt.Sprintf("failed to Lookup %v CODE %v", name, ecode))
+	}
+	return
+}
+
+//Internal functions
 
 func printT(i interface{}) {
 	fmt.Printf("%T = %v\n", i, i)
+}
+
+//Test foo functions
+
+func test() {
+    
 }

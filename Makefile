@@ -13,6 +13,7 @@ LDFLAGS=`pkg-config --libs libgit2`
 
 CLEANFILES+=defs.go ./tmp ctest
 
+
 include $(GOROOT)/src/Make.pkg
 
 ctest: clean ctest.c
@@ -25,6 +26,6 @@ defs.go: defs.c
 format:
 	gofmt -l -w *.go
 
-all: ctest test
+all: test
 
 defs.go: defs.c

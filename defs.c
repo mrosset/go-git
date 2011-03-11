@@ -13,6 +13,7 @@ enum
     $GIT_OBJ_TREE = GIT_OBJ_TREE,     
     $GIT_OBJ__EXT2 = GIT_OBJ__EXT2,    
 
+    $GIT_SUCCESS = GIT_SUCCESS,
     $GIT_ENOTOID = GIT_ENOTOID
 };
 

@@ -16,21 +16,37 @@ var (
 )
 
 func init() {
-	path, _ = os.Getwd()
-	path = "/tmp"
+	path = "./tmp"
 	repo = &Repo{}
 }
 
-func TestInit(t *testing.T) {
+func TestInitBare(t *testing.T) {
 	if err := repo.Init(path, BARE); err != nil {
 		t.Fatal("Error:", err)
 	}
 }
 
-func TestOpen(t *testing.T) {
+func TestOpenBare(t *testing.T) {
+    //defer os.RemoveAll(path)
+    defer repo.Free()
 	err := repo.Open(path)
 	if err != nil {
 		t.Fatal("Error:", err)
+        os.Exit(1)
+	}
+}
+
+func TestInitNotBare(t *testing.T) {
+	if err := repo.Init(path, NOTBARE); err != nil {
+		t.Fatal("Error:", err)
+	}
+}
+
+func TestOpenNotBare(t *testing.T) {
+	err := repo.Open(path+"/.git")
+	if err != nil {
+		t.Fatal("Error:", err)
+        os.Exit(1)
 	}
 }
 
@@ -38,6 +54,13 @@ func TestNewOid(t *testing.T) {
 	if _, err := NewOid(oid); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestRefLookup(t *testing.T) {
+    ref := &Reference{}
+    if err := ref.Lookup(repo,"ref/heads/master"); err != nil {
+        t.Fatal("Error:", err)
+    }
 }
 
 /*
@@ -68,3 +91,4 @@ func TestFinal(t *testing.T) {
 func TestTest(t *testing.T) {
 	test()
 }
+
