@@ -1,12 +1,14 @@
 package git
 
 /*
+#include <stdlib.h>
 #include <git2.h>
 */
 import "C"
 import (
 	"fmt"
 	"os"
+	"unsafe"
 )
 
 const (
@@ -39,7 +41,6 @@ func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
 	ecode := C.git_repository_init(&v.git_repo, C.CString(path), C.uint(isbare))
 	if ecode != GIT_SUCCESS {
 		e := fmt.Sprintf("failed to init %v CODE %v", path, ecode)
-		println(e)
 		return os.NewError(e)
 	}
 	return
@@ -67,15 +68,21 @@ func (c *Commit) Email() string {
 // Oid
 type Oid struct {
 	git_oid *C.git_oid
-	String  string
 }
 
 func NewOid(s string) (*Oid, os.Error) {
-	o := &Oid{new(C.git_oid), s}
+	o := &Oid{new(C.git_oid)}
 	if C.git_oid_mkstr(o.git_oid, C.CString(s)) == GIT_ENOTOID {
 		return nil, os.NewError("could not create new oid")
 	}
 	return o, nil
+}
+
+func (v *Oid) String() string {
+	p := C.git_oid_allocfmt(v.git_oid)
+	sha := C.GoString(p)
+	C.free(unsafe.Pointer(p))
+	return sha
 }
 
 // RevWalk
@@ -125,8 +132,24 @@ func (v *Reference) Lookup(r *Repo, name string) (err os.Error) {
 	return
 }
 
-//Internal functions
+func (v *Reference) GetOid() *Oid {
+	return &Oid{C.git_reference_oid(v.git_reference)}
+}
 
+//Index
+
+type Index struct {
+	git_index *C.git_index
+}
+
+func (v *Index) Read() (err os.Error) {
+	if ecode := C.git_index_read(v.git_index); ecode != GIT_SUCCESS {
+		return os.NewError("index read failed with code " + string(ecode))
+	}
+	return
+}
+
+//Private
 func printT(i interface{}) {
 	fmt.Printf("%T = %v\n", i, i)
 }
@@ -134,5 +157,4 @@ func printT(i interface{}) {
 //Test foo functions
 
 func test() {
-    
 }

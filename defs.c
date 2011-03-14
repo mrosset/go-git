@@ -19,3 +19,4 @@ enum
 
 typedef struct git_signature $Signature;
 typedef struct git_time $GitTime;
+typedef struct git_index_entry $IndexEntry;

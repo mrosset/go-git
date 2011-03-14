@@ -1,6 +1,8 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=go-git
+export LD_LIBRARY_PATH := libgit2/build/shared
+
+TARG=git
 
 CGOFILES=git.go
 GOFILES=defs.go
@@ -13,8 +15,12 @@ LDFLAGS=`pkg-config --libs libgit2`
 
 CLEANFILES+=defs.go ./tmp ctest
 
+.PHONY: libgit2 libgit2clean
 
 include $(GOROOT)/src/Make.pkg
+
+libgit2:
+	make -C $@
 
 ctest: clean ctest.c
 	gcc -g -O0 -Wall $(CFLAGS) $(LDFLAGS) $@.c -o $@
@@ -23,7 +29,7 @@ ctest: clean ctest.c
 defs.go: defs.c
 	godefs -g git defs.c > defs.go
 
-format:
+format: *.go
 	gofmt -l -w *.go
 
 all: test
