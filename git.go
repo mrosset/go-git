@@ -29,10 +29,6 @@ func (v *Repo) Open(path string) (err os.Error) {
 	return
 }
 
-func (v *Repo) Lookup(c *Commit, o *Oid, mask int) {
-	//C.git_repository_lookup(&c.git_commit, v.git_repo, o.git_oid, (C.git_otype)(mask))
-}
-
 func (v *Repo) Free() {
 	C.git_repository_free(v.git_repo)
 }
@@ -46,9 +42,18 @@ func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
 	return
 }
 
+
 // Commit
 type Commit struct {
 	git_commit *C.git_commit
+}
+
+func (c *Commit) Lookup(r *Repo, o *Oid) (err os.Error) {
+    if e := C.git_commit_lookup(&c.git_commit,r.git_repo,o.git_oid); e != GIT_SUCCESS{
+		es := fmt.Sprintf("commit lookup failed CODE %v", path, e)
+        return os.NewError(es)
+    }
+    return err
 }
 
 func (c *Commit) Msg() string {
@@ -102,13 +107,18 @@ func (v *RevWalk) Reset() {
 	C.git_revwalk_reset(v.git_revwalk)
 }
 
-func (v *RevWalk) Push(c *Commit) {
-	C.git_revwalk_push(v.git_revwalk, c.git_commit)
+
+func (v *RevWalk) Push(o *Oid) {
+	C.git_revwalk_push(v.git_revwalk, o.git_oid)
 }
 
-func (v *RevWalk) Next(c *Commit) {
-	C.git_revwalk_next(&c.git_commit, v.git_revwalk)
+func (v *RevWalk) Next(o *Oid) (err os.Error){
+	if ecode := C.git_revwalk_next(o.git_oid,v.git_revwalk); ecode != GIT_SUCCESS {
+		return os.NewError(fmt.Sprintf("RevWalk.Next error CODE %v",ecode))
+    }
+    return err
 }
+
 
 //TODO: implement this
 func (v *RevWalk) Sorting(sm uint) {

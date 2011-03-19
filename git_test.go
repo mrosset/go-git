@@ -2,7 +2,7 @@ package git
 
 import (
 	"exec"
-	"io/ioutil"
+	"encoding/line"
 	"os"
 	"strings"
 	"testing"
@@ -13,13 +13,16 @@ var (
 	revwalk *RevWalk
 	path    string
 	head    string
+	author  string
 	ref     = &Reference{}
 )
 
 func init() {
 	path = "./tmp"
+	author = "schizoid29@gmail.com"
 }
 
+// Repo
 func TestInitBare(t *testing.T) {
 	repo = &Repo{}
 	if err := repo.Init(path, BARE); err != nil {
@@ -53,21 +56,26 @@ func TestOpenNotBare(t *testing.T) {
 //FIXME: only fork calls till we have proper boiler plate
 func TestCommit(t *testing.T) {
 	var (
-		err os.Error
 		cmd *exec.Cmd
 	)
 
 	tmpfile := "README"
 
-	err = ioutil.WriteFile("./tmp/"+tmpfile, []byte("test\n"), 0644)
-
+	f, err := os.Open(path+"/"+tmpfile, os.O_CREAT|os.O_RDWR|os.O_APPEND, 0644)
+	_, err = f.WriteString("foo\n")
+	f.Close()
+	if err != nil {
+		println(err.String())
+		os.Exit(1)
+	}
 	cmd, err = run("git add " + tmpfile)
 	cmd.Close()
 	cmd, err = run("git commit -m test")
 	cmd.Close()
 	cmd, err = run("git log --pretty=%H")
-	buf, _ := ioutil.ReadAll(cmd.Stdout)
-	head = strings.Trim(string(buf), "\n")
+	r := line.NewReader(cmd.Stdout, 256)
+	h, _, _ := r.ReadLine()
+	head = (string(h))
 	println(head)
 	cmd.Close()
 
@@ -76,16 +84,16 @@ func TestCommit(t *testing.T) {
 	}
 }
 
-func run(s string) (cmd *exec.Cmd, err os.Error) {
-	wd := "./tmp/"
-	args := strings.Split(s, " ", -1)
-	bin, err := exec.LookPath(args[0])
-
-	cmd, err = exec.Run(bin, args, os.Environ(), wd, exec.DevNull, exec.Pipe, exec.PassThrough)
-
-	return
+//FIXME: change this to a bench and not use forks
+func TestManyCommits(t *testing.T) {
+	for i := 0; i < 29; i++ {
+		TestCommit(t)
+	}
 }
 
+//Commit
+
+//Ref
 func TestRefLookup(t *testing.T) {
 	var err os.Error
 	refpath := "refs/heads/master"
@@ -102,12 +110,33 @@ func TestRefLookup(t *testing.T) {
 	}
 }
 
-/*
-func TestRefGetOid(t *testing.T) {
-	oid := ref.GetOid()
-	oid.String()
+// RevWalk
+func TestNewRevWalk(t *testing.T) {
+	var err os.Error
+	revwalk, err = NewRevWalk(repo)
+	if err != nil {
+		t.Fatal("Error:", err)
+	}
 }
-*/
+
+func TestRevWalkNext(t *testing.T) {
+	o, _ := NewOid(head)
+	revwalk.Push(o)
+	if err := revwalk.Next(o); err != nil {
+		t.Fatal("Error:", err)
+	}
+	if o.String() != head {
+		t.Errorf("oid string should match %v is %v", head, o.String())
+	}
+}
+
+//Oid
+func TestNewOid(t *testing.T) {
+	if _, err := NewOid(head); err != nil {
+		t.Error(err)
+	}
+}
+
 //Important: this must be called after all of the Test functions
 func TestFinal(t *testing.T) {
 	if revwalk != nil {
@@ -118,33 +147,14 @@ func TestFinal(t *testing.T) {
 	}
 }
 
-/*  Not implimented yet 
+//private helper functions
 
-func TestLookup(t *testing.T) {
-	c := &Commit{}
-	o, _ := NewOid(oid)
-	repo.Lookup(c, o, GIT_OBJ_ANY)
-	if c.Author() != author {
-		t.Fatal("ERROR:",os.NewError("Lookup failed"))
-	}
-}
+func run(s string) (cmd *exec.Cmd, err os.Error) {
+	wd := "./tmp/"
+	args := strings.Split(s, " ", -1)
+	bin, err := exec.LookPath(args[0])
 
-func TestNewOid(t *testing.T) {
-	if _, err := NewOid(oid); err != nil {
-		t.Error(err)
-	}
-}
+	cmd, err = exec.Run(bin, args, os.Environ(), wd, exec.DevNull, exec.Pipe, exec.PassThrough)
 
-func TestNewRevWalk(t *testing.T) {
-	var err os.Error
-	revwalk, err = NewRevWalk(repo)
-	if err != nil {
-		t.Fatal("ERROR:", err)
-	}
-}
-*/
-
-
-func TestTest(t *testing.T) {
-	test()
+	return
 }
