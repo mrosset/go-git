@@ -76,7 +76,6 @@ func TestCommit(t *testing.T) {
 	r := line.NewReader(cmd.Stdout, 256)
 	h, _, _ := r.ReadLine()
 	head = (string(h))
-	println(head)
 	cmd.Close()
 
 	if err != nil {

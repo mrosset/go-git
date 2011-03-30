@@ -16,6 +16,8 @@ const (
 	BARE
 )
 
+type Test *C.git_repository
+
 /* Repo */
 type Repo struct {
 	git_repo *C.git_repository
@@ -50,7 +52,7 @@ type Commit struct {
 
 func (c *Commit) Lookup(r *Repo, o *Oid) (err os.Error) {
     if e := C.git_commit_lookup(&c.git_commit,r.git_repo,o.git_oid); e != GIT_SUCCESS{
-		es := fmt.Sprintf("commit lookup failed CODE %v", path, e)
+		es := fmt.Sprintf("commit lookup failed CODE %v", e)
         return os.NewError(es)
     }
     return err
