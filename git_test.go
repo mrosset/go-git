@@ -90,9 +90,9 @@ func TestManyCommits(t *testing.T) {
 	}
 }
 
-//Commit
+// Commit
 
-//Ref
+// Ref
 func TestRefLookup(t *testing.T) {
 	var err os.Error
 	refpath := "refs/heads/master"
@@ -129,14 +129,14 @@ func TestRevWalkNext(t *testing.T) {
 	}
 }
 
-//Oid
+// Oid
 func TestNewOid(t *testing.T) {
 	if _, err := NewOid(head); err != nil {
 		t.Error(err)
 	}
 }
 
-//Important: this must be called after all of the Test functions
+// Important: this must be called after all of the Test functions
 func TestFinal(t *testing.T) {
 	if revwalk != nil {
 		revwalk.Free()
@@ -146,8 +146,7 @@ func TestFinal(t *testing.T) {
 	}
 }
 
-//private helper functions
-
+// private helper functions
 func run(s string) (cmd *exec.Cmd, err os.Error) {
 	wd := "./tmp/"
 	args := strings.Split(s, " ", -1)
