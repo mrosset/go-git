@@ -31,5 +31,3 @@ defs.go: defs.c
 
 format: *.go
 	gofmt -l -w *.go
-
-defs.go: defs.c
