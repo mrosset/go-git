@@ -61,7 +61,7 @@ func TestCommit(t *testing.T) {
 
 	tmpfile := "README"
 
-	f, err := os.Open(path+"/"+tmpfile, os.O_CREAT|os.O_RDWR|os.O_APPEND, 0644)
+	f, err := os.Create(path+"/"+tmpfile)
 	_, err = f.WriteString("foo\n")
 	f.Close()
 	if err != nil {
