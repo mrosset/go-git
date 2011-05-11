@@ -24,7 +24,7 @@ func init() {
 
 // Repo
 func TestInitBare(t *testing.T) {
-	repo = &Repo{}
+	repo = new(Repo)
 	if err := repo.Init(path, BARE); err != nil {
 		t.Fatal("Error:", err)
 	}
@@ -40,7 +40,7 @@ func TestOpenBare(t *testing.T) {
 }
 
 func TestInitNotBare(t *testing.T) {
-	repo = &Repo{}
+	repo = new(Repo)
 	if err := repo.Init(path, NOTBARE); err != nil {
 		t.Fatal("Error:", err)
 	}
@@ -61,7 +61,7 @@ func TestCommit(t *testing.T) {
 
 	tmpfile := "README"
 
-	f, err := os.Create(path+"/"+tmpfile)
+	f, err := os.OpenFile(path+"/"+tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
 	_, err = f.WriteString("foo\n")
 	f.Close()
 	if err != nil {
@@ -76,6 +76,7 @@ func TestCommit(t *testing.T) {
 	r := line.NewReader(cmd.Stdout, 256)
 	h, _, _ := r.ReadLine()
 	head = (string(h))
+	println(head)
 	cmd.Close()
 
 	if err != nil {
