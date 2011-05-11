@@ -53,6 +53,10 @@ func TestOpenNotBare(t *testing.T) {
 	}
 }
 
+// Commit
+
+
+
 //FIXME: only fork calls till we have proper boiler plate
 func TestCommit(t *testing.T) {
 	var (
@@ -76,7 +80,6 @@ func TestCommit(t *testing.T) {
 	r := line.NewReader(cmd.Stdout, 256)
 	h, _, _ := r.ReadLine()
 	head = (string(h))
-	println(head)
 	cmd.Close()
 
 	if err != nil {
@@ -90,8 +93,6 @@ func TestManyCommits(t *testing.T) {
 		TestCommit(t)
 	}
 }
-
-// Commit
 
 // Ref
 func TestRefLookup(t *testing.T) {
@@ -137,6 +138,31 @@ func TestNewOid(t *testing.T) {
 	}
 }
 
+// Singature
+func TestSignature(t *testing.T) {
+	NewSignature("foo","bar")
+}
+
+// Index
+func TestIndexAdd(t *testing.T) {
+	index := new(Index)
+	defer index.Free()
+	err := index.Open(repo)
+	handleError(t, err)
+	tmpfile := "README"
+	f, err := os.OpenFile(path+"/"+tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+	_, err = f.WriteString("foo\n")
+	f.Close()
+	err = index.Add(tmpfile)
+	handleError(t, err)
+	err = index.Write()
+	handleError(t, err)
+}
+
+func TestCommitNew(t *testing.T) {
+	//CommitCreate(repo,"some stuff here")
+}
+
 // Important: this must be called after all of the Test functions
 func TestFinal(t *testing.T) {
 	if revwalk != nil {
@@ -156,4 +182,10 @@ func run(s string) (cmd *exec.Cmd, err os.Error) {
 	cmd, err = exec.Run(bin, args, os.Environ(), wd, exec.DevNull, exec.Pipe, exec.PassThrough)
 
 	return
+}
+
+func handleError(t *testing.T, err os.Error) {
+	if err != nil {
+		t.Error(err)
+	}
 }
