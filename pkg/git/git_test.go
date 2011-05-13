@@ -59,7 +59,7 @@ func TestSeed(t *testing.T) {
 
 	tmpfile := "README"
 
-	f, err := os.OpenFile(path+"/"+tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+	f, err := os.Create(path + "/" + tmpfile)
 	_, err = f.WriteString("foo\n")
 	f.Close()
 	if err != nil {
