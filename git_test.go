@@ -2,7 +2,6 @@ package git
 
 import (
 	"exec"
-	"encoding/line"
 	"os"
 	"strings"
 	"testing"
@@ -12,7 +11,6 @@ var (
 	repo    *Repo
 	revwalk *RevWalk
 	path    string
-	head    string
 	author  string
 	ref     = &Reference{}
 )
@@ -53,12 +51,8 @@ func TestOpenNotBare(t *testing.T) {
 	}
 }
 
-// Commit
-
-
-
-//FIXME: only fork calls till we have proper boiler plate
-func TestCommit(t *testing.T) {
+//FIXME: figure out how to seed an intial HEAD
+func TestSeed(t *testing.T) {
 	var (
 		cmd *exec.Cmd
 	)
@@ -76,71 +70,10 @@ func TestCommit(t *testing.T) {
 	cmd.Close()
 	cmd, err = run("git commit -m test")
 	cmd.Close()
-	cmd, err = run("git log --pretty=%H")
-	r := line.NewReader(cmd.Stdout, 256)
-	h, _, _ := r.ReadLine()
-	head = (string(h))
-	cmd.Close()
 
 	if err != nil {
 		t.Fatal("Error:", err)
 	}
-}
-
-//FIXME: change this to a bench and not use forks
-func TestManyCommits(t *testing.T) {
-	for i := 0; i < 29; i++ {
-		TestCommit(t)
-	}
-}
-
-// Ref
-func TestRefLookup(t *testing.T) {
-	var err os.Error
-	refpath := "refs/heads/master"
-	_, err = os.Stat(".git/" + refpath)
-	if err != nil {
-		t.Fatalf("Error:", err)
-	}
-	err = ref.Lookup(repo, "refs/heads/master")
-	if err != nil {
-		t.Fatalf("Error:", err)
-	}
-	if ref.GetOid().String() != head {
-		t.Fatalf("Error:", os.NewError("sha does not match head"))
-	}
-}
-
-// RevWalk
-func TestNewRevWalk(t *testing.T) {
-	var err os.Error
-	revwalk, err = NewRevWalk(repo)
-	if err != nil {
-		t.Fatal("Error:", err)
-	}
-}
-
-func TestRevWalkNext(t *testing.T) {
-	o, _ := NewOid(head)
-	revwalk.Push(o)
-	if err := revwalk.Next(o); err != nil {
-		t.Fatal("Error:", err)
-	}
-	if o.String() != head {
-		t.Errorf("oid string should match %v is %v", head, o.String())
-	}
-}
-
-// Oid
-func TestNewOid(t *testing.T) {
-	if _, err := NewOid(head); err != nil {
-		t.Error(err)
-	}
-}
-
-// Singature
-func TestSignature(t *testing.T) {
-	NewSignature("foo","bar")
 }
 
 // Index
@@ -159,8 +92,71 @@ func TestIndexAdd(t *testing.T) {
 	handleError(t, err)
 }
 
-func TestCommitNew(t *testing.T) {
-	//CommitCreate(repo,"some stuff here")
+// Commit
+func TestCommit(t *testing.T) {
+	TestIndexAdd(t)
+	index := new(Index)
+	defer index.Free()
+	err := index.Open(repo)
+	handleError(t, err)
+	tree, err := TreeFromIndex(repo, index)
+	handleError(t, err)
+	head,_ := GetHeadString(repo)
+	parent, err := NewOidString(head)
+	handleError(t, err)
+	s := NewSignature("Foo Bar", "foo@bar.com")
+	err = CommitCreate(repo, tree, parent, s, s, "some stuff here")
+	handleError(t, err)
+}
+
+func TestManyCommits(t *testing.T) {
+	for i := 0; i < 29; i++ {
+		TestCommit(t)
+	}
+}
+
+// RevWalk
+func TestNewRevWalk(t *testing.T) {
+	var err os.Error
+	revwalk, err = NewRevWalk(repo)
+	if err != nil {
+		t.Fatal("Error:", err)
+	}
+}
+
+func TestRevWalkNext(t *testing.T) {
+	head,_ := GetHeadString(repo)
+	o, _ := NewOidString(head)
+	revwalk.Push(o)
+	if err := revwalk.Next(o); err != nil {
+		t.Fatal("Error:", err)
+	}
+	if o.String() != head {
+		t.Errorf("oid string should match %v is %v", head, o.String())
+	}
+}
+
+// Oid
+func TestNewOid(t *testing.T) {
+	head,_ := GetHeadString(repo)
+	if _, err := NewOidString(head); err != nil {
+		t.Error(err)
+	}
+}
+
+// Singature
+func TestSignature(t *testing.T) {
+	NewSignature("foo", "bar")
+}
+
+// Tree
+func TestTreeFromIndex(t *testing.T) {
+	index := new(Index)
+	defer index.Free()
+	err := index.Open(repo)
+	handleError(t, err)
+	_, err = TreeFromIndex(repo, index)
+	handleError(t, err)
 }
 
 // Important: this must be called after all of the Test functions

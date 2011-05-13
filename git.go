@@ -16,6 +16,11 @@ const (
 	BARE
 )
 
+var (
+	println = fmt.Println
+	printf  = fmt.Println
+)
+
 type Test *C.git_repository
 
 /* Repo */
@@ -43,29 +48,46 @@ func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
 	}
 	return
 }
+// Tree
+
+type Tree struct {
+	git_tree *C.git_tree
+}
+
+func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
+	oid := NewOid()
+	ecode := C.git_tree_create_fromindex(oid.git_oid, index.git_index)
+	if ecode != GIT_SUCCESS {
+		lasterror := C.GoString(C.git_lasterror())
+		return nil, os.NewError(lasterror)
+	}
+	return oid, nil
+}
 
 // Commit
 type Commit struct {
 	git_commit *C.git_commit
 }
 
-func CommitCreate(repo *Repo, message string) {
-	s := NewSignature("foo", "bar")
+func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, message string) os.Error {
 	m := C.CString(message)
-	oid := new(Oid)
-	tree,_ := NewOid("28873d96b4e8f4e33ea30f4c682fd325f7ba56ac")
-	parent,_ := NewOid("f0877d0b841d75172ec404fc9370173dfffc20d1")
+	oid := NewOid()
 	update_ref := C.CString("HEAD")
-	C.git_commit_create(
+	ecode := C.git_commit_create(
 		oid.git_oid,
 		repo.git_repo,
 		update_ref,
-		s.git_signature,
-		s.git_signature,
+		author.git_signature,
+		commiter.git_signature,
 		m,
 		tree.git_oid,
 		1,
 		&parent.git_oid)
+	if ecode != GIT_SUCCESS {
+		lasterror := C.GoString(C.git_lasterror())
+		return os.NewError(lasterror)
+	}
+	return nil
 }
 
 func (c *Commit) Lookup(r *Repo, o *Oid) (err os.Error) {
@@ -95,9 +117,14 @@ type Oid struct {
 	git_oid *C.git_oid
 }
 
-func NewOid(s string) (*Oid, os.Error) {
+func NewOid() *Oid {
 	o := &Oid{new(C.git_oid)}
-	if C.git_oid_mkstr(o.git_oid, C.CString(s)) == GIT_ENOTOID {
+	return o
+}
+
+func NewOidString(s string) (*Oid, os.Error) {
+	o := &Oid{new(C.git_oid)}
+	if C.git_oid_mkstr(o.git_oid, C.CString(s)) < GIT_SUCCESS {
 		return nil, os.NewError("could not create new oid")
 	}
 	return o, nil
@@ -116,11 +143,12 @@ type RevWalk struct {
 }
 
 func NewRevWalk(repo *Repo) (*RevWalk, os.Error) {
-	r := new(RevWalk)
-	if C.git_revwalk_new(&r.git_revwalk, repo.git_repo) != 0 {
-		return nil, os.NewError("could not create new RevWalk")
+	rev := new(RevWalk)
+	if C.git_revwalk_new(&rev.git_revwalk, repo.git_repo) < GIT_SUCCESS {
+		lasterror := C.GoString(C.git_lasterror())
+		return nil, os.NewError(lasterror)
 	}
-	return r, nil
+	return rev, nil
 }
 
 func (v *RevWalk) Reset() {
@@ -132,10 +160,31 @@ func (v *RevWalk) Push(o *Oid) {
 }
 
 func (v *RevWalk) Next(o *Oid) (err os.Error) {
-	if ecode := C.git_revwalk_next(o.git_oid, v.git_revwalk); ecode != GIT_SUCCESS {
-		return os.NewError(fmt.Sprintf("RevWalk.Next error CODE %v", ecode))
+	if C.git_revwalk_next(o.git_oid, v.git_revwalk) < GIT_SUCCESS {
+		lasterror := C.GoString(C.git_lasterror())
+		return os.NewError(lasterror)
 	}
 	return err
+}
+
+func GetHeadString(repo *Repo) (string, os.Error) {
+	var err os.Error
+	err = ref.Lookup(repo, "refs/heads/master")
+	if err != nil {
+		return "", err
+	}
+	head := ref.GetOid()
+	return head.String(), nil
+}
+
+func GetHead(repo *Repo) (*Oid, os.Error) {
+	var err os.Error
+	err = ref.Lookup(repo, "refs/heads/master")
+	if err != nil {
+		return nil, err
+	}
+	head := ref.GetOid()
+	return head, nil
 }
 
 //TODO: implement this
