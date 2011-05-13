@@ -1,7 +1,7 @@
 package git
 
 /*
-#cgo LDFLAGS: -lgit2 -lcypto -ldl -lz 
+#cgo LDFLAGS: -lgit2 -lcrypto -ldl -lz 
 #include <stdlib.h>
 #include <git2.h>
 */
