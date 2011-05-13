@@ -7,3 +7,6 @@ gogit:
 clean:
 	make -C pkg/git clean
 	make -C cmd/gogit clean
+
+install:
+	make -C pkg/git install
