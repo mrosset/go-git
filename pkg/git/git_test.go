@@ -101,7 +101,7 @@ func TestCommit(t *testing.T) {
 	handleError(t, err)
 	tree, err := TreeFromIndex(repo, index)
 	handleError(t, err)
-	head,_ := GetHeadString(repo)
+	head, _ := GetHeadString(repo)
 	parent, err := NewOidString(head)
 	handleError(t, err)
 	s := NewSignature("Foo Bar", "foo@bar.com")
@@ -125,7 +125,7 @@ func TestNewRevWalk(t *testing.T) {
 }
 
 func TestRevWalkNext(t *testing.T) {
-	head,_ := GetHeadString(repo)
+	head, _ := GetHeadString(repo)
 	o, _ := NewOidString(head)
 	revwalk.Push(o)
 	if err := revwalk.Next(o); err != nil {
@@ -138,7 +138,7 @@ func TestRevWalkNext(t *testing.T) {
 
 // Oid
 func TestNewOid(t *testing.T) {
-	head,_ := GetHeadString(repo)
+	head, _ := GetHeadString(repo)
 	if _, err := NewOidString(head); err != nil {
 		t.Error(err)
 	}

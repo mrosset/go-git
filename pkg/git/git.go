@@ -30,9 +30,11 @@ type Repo struct {
 }
 
 func (v *Repo) Open(path string) (err os.Error) {
-	ecode := C.git_repository_open(&v.git_repo, C.CString(path))
+	cpath := C.CString(path)
+	defer C.free(unsafe.Pointer(cpath))
+	ecode := C.git_repository_open(&v.git_repo, cpath)
 	if ecode != GIT_SUCCESS {
-		err = os.NewError(fmt.Sprintf("failed to open %v CODE %v", path, ecode))
+		return LastError()
 	}
 	return
 }
@@ -43,9 +45,8 @@ func (v *Repo) Free() {
 
 func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
 	ecode := C.git_repository_init(&v.git_repo, C.CString(path), C.uint(isbare))
-	if ecode != GIT_SUCCESS {
-		e := fmt.Sprintf("failed to init %v CODE %v", path, ecode)
-		return os.NewError(e)
+	if ecode < GIT_SUCCESS {
+		return LastError()
 	}
 	return
 }
@@ -58,9 +59,8 @@ type Tree struct {
 func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
 	oid := NewOid()
 	ecode := C.git_tree_create_fromindex(oid.git_oid, index.git_index)
-	if ecode != GIT_SUCCESS {
-		lasterror := C.GoString(C.git_lasterror())
-		return nil, os.NewError(lasterror)
+	if ecode < GIT_SUCCESS {
+		return nil, LastError()
 	}
 	return oid, nil
 }
@@ -84,17 +84,16 @@ func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, me
 		tree.git_oid,
 		1,
 		&parent.git_oid)
-	if ecode != GIT_SUCCESS {
-		lasterror := C.GoString(C.git_lasterror())
-		return os.NewError(lasterror)
+	if ecode < GIT_SUCCESS {
+		return LastError()
 	}
 	return nil
 }
 
 func (c *Commit) Lookup(r *Repo, o *Oid) (err os.Error) {
-	if e := C.git_commit_lookup(&c.git_commit, r.git_repo, o.git_oid); e != GIT_SUCCESS {
-		es := fmt.Sprintf("commit lookup failed CODE %v", e)
-		return os.NewError(es)
+	ecode := C.git_commit_lookup(&c.git_commit, r.git_repo, o.git_oid)
+	if ecode < GIT_SUCCESS {
+		return LastError()
 	}
 	return err
 }
@@ -126,7 +125,7 @@ func NewOid() *Oid {
 func NewOidString(s string) (*Oid, os.Error) {
 	o := &Oid{new(C.git_oid)}
 	if C.git_oid_mkstr(o.git_oid, C.CString(s)) < GIT_SUCCESS {
-		return nil, os.NewError("could not create new oid")
+		return nil, LastError()
 	}
 	return o, nil
 }
@@ -146,8 +145,7 @@ type RevWalk struct {
 func NewRevWalk(repo *Repo) (*RevWalk, os.Error) {
 	rev := new(RevWalk)
 	if C.git_revwalk_new(&rev.git_revwalk, repo.git_repo) < GIT_SUCCESS {
-		lasterror := C.GoString(C.git_lasterror())
-		return nil, os.NewError(lasterror)
+		return nil, LastError()
 	}
 	return rev, nil
 }
@@ -162,8 +160,7 @@ func (v *RevWalk) Push(o *Oid) {
 
 func (v *RevWalk) Next(o *Oid) (err os.Error) {
 	if C.git_revwalk_next(o.git_oid, v.git_revwalk) < GIT_SUCCESS {
-		lasterror := C.GoString(C.git_lasterror())
-		return os.NewError(lasterror)
+		return LastError()
 	}
 	return err
 }
@@ -204,8 +201,8 @@ type Reference struct {
 
 func (v *Reference) Lookup(r *Repo, name string) (err os.Error) {
 	ecode := C.git_reference_lookup(&v.git_reference, r.git_repo, C.CString(name))
-	if ecode != GIT_SUCCESS {
-		err = os.NewError(fmt.Sprintf("failed to Lookup %v CODE %v", name, ecode))
+	if ecode < GIT_SUCCESS {
+		return LastError()
 	}
 	return
 }
@@ -222,7 +219,7 @@ type Index struct {
 
 func (v *Index) Open(repo *Repo) (err os.Error) {
 	if ecode := C.git_index_open_inrepo(&v.git_index, repo.git_repo); ecode != GIT_SUCCESS {
-		return os.NewError("index open failed with code " + string(ecode))
+		return LastError()
 	}
 	return
 }
@@ -231,22 +228,21 @@ func (v *Index) Add(file string) (err os.Error) {
 	s := C.CString(file)
 	defer C.free(unsafe.Pointer(s))
 	if C.git_index_add(v.git_index, s, 0) < GIT_SUCCESS {
-		lasterror := C.GoString(C.git_lasterror())
-		return os.NewError(lasterror)
+		return LastError()
 	}
 	return
 }
 
 func (v *Index) Read() (err os.Error) {
 	if ecode := C.git_index_read(v.git_index); ecode != GIT_SUCCESS {
-		return os.NewError("index read failed with code " + string(ecode))
+		return LastError()
 	}
 	return
 }
 
 func (v *Index) Write() (err os.Error) {
 	if ecode := C.git_index_write(v.git_index); ecode != GIT_SUCCESS {
-		return os.NewError("index write failed with code " + string(ecode))
+		return LastError()
 	}
 	return
 }
@@ -269,12 +265,15 @@ func NewSignature(name, email string) *Signature {
 	return s
 }
 
+//errors.h:GIT_EXTERN(const char *) git_lasterror(void);
+
+// Helper functions
+func LastError() os.Error {
+	lasterror := C.GoString(C.git_lasterror())
+	return os.NewError(lasterror)
+}
+
 //Private
 func printT(i interface{}) {
 	fmt.Printf("%T = %v\n", i, i)
-}
-
-//Test foo functions
-
-func test() {
 }
