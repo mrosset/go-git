@@ -168,8 +168,8 @@ func (v *RevWalk) Next(o *Oid) (err os.Error) {
 }
 
 func GetHeadString(repo *Repo) (string, os.Error) {
-	var err os.Error
-	err = ref.Lookup(repo, "refs/heads/master")
+	ref := new(Reference)
+	err := ref.Lookup(repo, "refs/heads/master")
 	if err != nil {
 		return "", err
 	}
@@ -178,8 +178,8 @@ func GetHeadString(repo *Repo) (string, os.Error) {
 }
 
 func GetHead(repo *Repo) (*Oid, os.Error) {
-	var err os.Error
-	err = ref.Lookup(repo, "refs/heads/master")
+	ref := new(Reference)
+	err := ref.Lookup(repo, "refs/heads/master")
 	if err != nil {
 		return nil, err
 	}
