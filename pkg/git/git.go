@@ -65,6 +65,17 @@ func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
 	return oid, nil
 }
 
+func TreeFromOid(repo *Repo, oid *Oid) (*Tree, os.Error) {
+	tree := new(Tree)
+	ecode := C.git_tree_lookup(&tree.git_tree, repo.git_repo, oid.git_oid)
+	fmt.Printf("Error: %v\n", ecode)
+	if ecode < GIT_SUCCESS {
+		return nil, LastError()
+	}
+	return tree, nil
+}
+
+
 // Commit
 type Commit struct {
 	git_commit *C.git_commit

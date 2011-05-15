@@ -177,6 +177,14 @@ func TestTreeFromIndex(t *testing.T) {
 	check(t, err)
 }
 
+func TestTreeFromOid(t *testing.T) {
+	r := repo
+	head, err := GetHead(r)
+	check(t, err)
+	_, err = TreeFromOid(r, head)
+	check(t, err)
+}
+
 // Important: this must be called after all of the Test functions
 func TestFinal(t *testing.T) {
 	if revwalk != nil {
