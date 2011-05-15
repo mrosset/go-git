@@ -164,16 +164,6 @@ func (v *RevWalk) Next(o *Oid) (err os.Error) {
 	return err
 }
 
-func GetHeadString(repo *Repo) (string, os.Error) {
-	ref := new(Reference)
-	err := ref.Lookup(repo, "refs/heads/master")
-	if err != nil {
-		return "", err
-	}
-	head := ref.GetOid()
-	return head.String(), nil
-}
-
 func GetHead(repo *Repo) (*Oid, os.Error) {
 	ref := new(Reference)
 	err := ref.Lookup(repo, "refs/heads/master")
@@ -182,6 +172,14 @@ func GetHead(repo *Repo) (*Oid, os.Error) {
 	}
 	head := ref.GetOid()
 	return head, nil
+}
+
+func GetHeadString(repo *Repo) (string, os.Error) {
+	head, err := GetHead(repo)
+	if err != nil {
+		return "", err
+	}
+	return head.String(), err
 }
 
 //TODO: implement this
