@@ -22,5 +22,5 @@ modules: libgit2
 	@git sub update libgit2
 
 html: pkg/git
-	godoc ./pkg/git > index.html
-	godoc ./pkg/git > README.md
+	godoc -html ./pkg/git > index.html
+	godoc -html ./pkg/git > README.md
