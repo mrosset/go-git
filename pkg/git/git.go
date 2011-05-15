@@ -18,11 +18,6 @@ const (
 	BARE
 )
 
-var (
-	println = fmt.Println
-	printf  = fmt.Println
-)
-
 type Test *C.git_repository
 
 // Repo
