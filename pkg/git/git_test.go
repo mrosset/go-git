@@ -2,6 +2,7 @@ package git
 
 import (
 	"exec"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -17,7 +18,7 @@ var (
 
 func init() {
 	path = "./tmp"
-	author = "schizoid29@gmail.com"
+	author = "foot@bar.com"
 }
 
 // Repo
@@ -81,15 +82,15 @@ func TestIndexAdd(t *testing.T) {
 	index := new(Index)
 	defer index.Free()
 	err := index.Open(repo)
-	handleError(t, err)
+	check(t, err)
 	tmpfile := "README"
 	f, err := os.OpenFile(path+"/"+tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
 	_, err = f.WriteString("foo\n")
 	f.Close()
 	err = index.Add(tmpfile)
-	handleError(t, err)
+	check(t, err)
 	err = index.Write()
-	handleError(t, err)
+	check(t, err)
 }
 
 // Commit
@@ -98,15 +99,15 @@ func TestCommit(t *testing.T) {
 	index := new(Index)
 	defer index.Free()
 	err := index.Open(repo)
-	handleError(t, err)
+	check(t, err)
 	tree, err := TreeFromIndex(repo, index)
-	handleError(t, err)
+	check(t, err)
 	head, _ := GetHeadString(repo)
 	parent, err := NewOidString(head)
-	handleError(t, err)
+	check(t, err)
 	s := NewSignature("Foo Bar", "foo@bar.com")
 	err = CommitCreate(repo, tree, parent, s, s, "some stuff here")
-	handleError(t, err)
+	check(t, err)
 }
 
 func TestManyCommits(t *testing.T) {
@@ -136,9 +137,25 @@ func TestRevWalkNext(t *testing.T) {
 	}
 }
 
+func TestRevWalk(t *testing.T) {
+	r := new(Repo)
+	err := r.Open("./tmp/.git")
+	check(t, err)
+	o := NewOid()
+	for {
+		if err := revwalk.Next(o); err != nil {
+			break
+		}
+		c := new(Commit)
+		c.Lookup(repo, o)
+		fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
+	}
+}
+
 // Oid
 func TestNewOid(t *testing.T) {
-	head, _ := GetHeadString(repo)
+	head, err := GetHeadString(repo)
+	check(t, err)
 	if _, err := NewOidString(head); err != nil {
 		t.Error(err)
 	}
@@ -154,9 +171,9 @@ func TestTreeFromIndex(t *testing.T) {
 	index := new(Index)
 	defer index.Free()
 	err := index.Open(repo)
-	handleError(t, err)
+	check(t, err)
 	_, err = TreeFromIndex(repo, index)
-	handleError(t, err)
+	check(t, err)
 }
 
 // Important: this must be called after all of the Test functions
@@ -180,7 +197,7 @@ func run(s string) (cmd *exec.Cmd, err os.Error) {
 	return
 }
 
-func handleError(t *testing.T, err os.Error) {
+func check(t *testing.T, err os.Error) {
 	if err != nil {
 		t.Error(err)
 	}
