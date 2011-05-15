@@ -18,8 +18,8 @@ install:
 	make -C pkg/git install
 
 modules: libgit2
-	@git sub init libgit2
-	@git sub update libgit2
+	@git submodule init libgit2
+	@git submodule update libgit2
 
 html: pkg/git
 	godoc -html ./pkg/git > index.html
