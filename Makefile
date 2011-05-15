@@ -21,6 +21,6 @@ modules: libgit2
 	@git sub init libgit2
 	@git sub update libgit2
 
-html: pkg/git
-	godoc -html ./pkg/git > index.html
-	godoc -html ./pkg/git > README.md
+html: clean
+	@cat index.head.html > index.html
+	@godoc -html ./pkg/git >> index.html
