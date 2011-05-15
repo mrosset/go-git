@@ -52,6 +52,10 @@ type Tree struct {
 	git_tree *C.git_tree
 }
 
+func (t *Tree) Free() {
+	C.git_tree_close(t.git_tree)
+}
+
 func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
 	oid := NewOid()
 	ecode := C.git_tree_create_fromindex(oid.git_oid, index.git_index)
