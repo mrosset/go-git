@@ -139,6 +139,7 @@ func TestRevWalkNext(t *testing.T) {
 
 func TestRevWalk(t *testing.T) {
 	r := new(Repo)
+	defer r.Free()
 	err := r.Open("./tmp/.git")
 	check(t, err)
 	o := NewOid()
