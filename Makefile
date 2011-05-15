@@ -23,3 +23,4 @@ modules: libgit2
 
 html: pkg/git
 	godoc ./pkg/git > index.html
+	godoc ./pkg/git > README.md
