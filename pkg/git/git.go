@@ -1,6 +1,7 @@
 package git
 
 /*
+#cgo CFLAGS: -O2 -pipe -march=native -mtune=native
 #cgo LDFLAGS: -lgit2 -lcrypto -ldl -lz 
 #include <stdlib.h>
 #include <git2.h>
@@ -24,7 +25,7 @@ var (
 
 type Test *C.git_repository
 
-/* Repo */
+// Repo
 type Repo struct {
 	git_repo *C.git_repository
 }
@@ -50,8 +51,8 @@ func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
 	}
 	return
 }
-// Tree
 
+// Tree
 type Tree struct {
 	git_tree *C.git_tree
 }
@@ -118,8 +119,7 @@ type Oid struct {
 }
 
 func NewOid() *Oid {
-	o := &Oid{new(C.git_oid)}
-	return o
+	return &Oid{new(C.git_oid)}
 }
 
 func NewOidString(s string) (*Oid, os.Error) {
@@ -132,9 +132,9 @@ func NewOidString(s string) (*Oid, os.Error) {
 
 func (v *Oid) String() string {
 	p := C.git_oid_allocfmt(v.git_oid)
-	sha := C.GoString(p)
+	sha1 := C.GoString(p)
 	C.free(unsafe.Pointer(p))
-	return sha
+	return sha1
 }
 
 // RevWalk
@@ -194,7 +194,6 @@ func (v *RevWalk) Free() {
 }
 
 //Reference
-
 type Reference struct {
 	git_reference *C.git_reference
 }
@@ -212,7 +211,6 @@ func (v *Reference) GetOid() *Oid {
 }
 
 //Index
-
 type Index struct {
 	git_index *C.git_index
 }
@@ -251,11 +249,11 @@ func (v *Index) Free() {
 	C.git_index_free(v.git_index)
 }
 
+// Signature
 type Signature struct {
 	git_signature *C.git_signature
 }
 
-// Signature
 func NewSignature(name, email string) *Signature {
 	n := C.CString(name)
 	e := C.CString(email)
@@ -264,8 +262,6 @@ func NewSignature(name, email string) *Signature {
 	s := &Signature{C.git_signature_now(n, e)}
 	return s
 }
-
-//errors.h:GIT_EXTERN(const char *) git_lasterror(void);
 
 // Helper functions
 func LastError() os.Error {

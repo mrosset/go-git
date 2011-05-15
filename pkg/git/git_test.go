@@ -2,7 +2,6 @@ package git
 
 import (
 	"exec"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -149,7 +148,8 @@ func TestRevWalk(t *testing.T) {
 		}
 		c := new(Commit)
 		c.Lookup(repo, o)
-		fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
+		// Output example
+		//fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
 	}
 }
 

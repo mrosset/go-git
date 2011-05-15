@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"git"
+	git "github.com/str1ngs/go-git/pkg/git"
 	"os"
 	"path"
 )

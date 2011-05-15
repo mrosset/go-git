@@ -1,12 +1,22 @@
-test: gogit
-	make -C pkg/git test
+test: modules clean
+	@make -C pkg/git $@
 
-gogit:
-	make -C cmd/gogit
+pkg:
+	@echo "building pkgs"
+	@make -C pkg/git
+
+cmd: pkg
+	@echo "building commands"
+	@make -C cmd/gogit
 
 clean:
-	make -C pkg/git clean
-	make -C cmd/gogit clean
+	@echo "cleaning"
+	@make -C pkg/git $@
+	@make -C cmd/gogit $@
 
 install:
 	make -C pkg/git install
+
+modules: libgit2
+	@git sub init libgit2
+	@git sub update libgit2
