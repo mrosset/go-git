@@ -10,6 +10,7 @@ import (
 var (
 	repo    *Repo
 	revwalk *RevWalk
+	tree    *Tree
 	path    string
 	author  string
 	ref     = &Reference{}
@@ -176,6 +177,59 @@ func TestTreeFromIndex(t *testing.T) {
 	_, err = TreeFromIndex(repo, index)
 	check(t, err)
 }
+
+func TestTreeFromCommit(t *testing.T) {
+	head, err := GetHead(repo)
+	check(t, err)
+	commit := new(Commit)
+	err = commit.Lookup(repo, head)
+	check(t, err)
+	tree, err = TreeFromCommit(repo, commit)
+	check(t, err)
+}
+
+func TestTreeEntryByName(t *testing.T) {
+	expected := "README"
+	entry, err := tree.EntryByName(expected)
+	if err != nil {
+		t.Fatal("Expected to find a file, but was unable to.")
+	}
+	if entry.Filename() != expected {
+		t.Fatal("EntryByName did not return the proper file. Expected %v, got %v",
+			expected,
+			entry.Filename())
+	}
+}
+
+
+func TestInvalidTreeEntryByName(t *testing.T) {
+	expected := "README.does-not-exist"
+	_, err := tree.EntryByName(expected)
+	if err == nil {
+		t.Fatal("Was expecting a does not exist error, but did not recieve one.")
+	}
+}
+
+func TestTreeEntryByIndex(t *testing.T) {
+	expected := "README"
+	entry, err := tree.EntryByIndex(0)
+	if err != nil {
+		t.Fatal("Was unable to find the first entry via index.")
+	}
+	if entry.Filename() != expected {
+		t.Fatalf(
+			"EntryByIndex did not return the proper file. Expected %v, got %v",
+			expected,
+			entry.Filename())
+	}
+}
+
+func TestTreeEntryCount(t *testing.T) {
+	if tree.EntryCount() != 1 {
+		t.Fatalf("Expected 1 file in the tree, but there were %v", tree.EntryCount())
+	}
+}
+
 
 // Important: this must be called after all of the Test functions
 func TestFinal(t *testing.T) {
