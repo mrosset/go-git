@@ -38,19 +38,22 @@ Constants
     NOTBARE = iota
     BARE
 )</pre>
-			<h2 id="CommitCreate">func <a href="/?s=1142:1244#L59">CommitCreate</a></h2>
+			<h2 id="CommitCreate">func <a href="/?s=2355:2457#L109">CommitCreate</a></h2>
 			<p><code>func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, message string) os.Error</code></p>
-			
-			<h2 id="GetHeadString">func <a href="/?s=3035:3084#L153">GetHeadString</a></h2>
+			<p>
+TODO: do not use hardcoded update_ref
+</p>
+
+			<h2 id="GetHeadString">func <a href="/?s=4656:4705#L216">GetHeadString</a></h2>
 			<p><code>func GetHeadString(repo *Repo) (string, os.Error)</code></p>
 			
-			<h2 id="LastError">func <a href="/?s=5016:5041#L252">LastError</a></h2>
+			<h2 id="LastError">func <a href="/?s=6442:6467#L304">LastError</a></h2>
 			<p><code>func LastError() os.Error</code></p>
 			<p>
 Helper functions
 </p>
 
-			<h2 id="Commit">type <a href="/?s=1092:1140#L55">Commit</a></h2>
+			<h2 id="Commit">type <a href="/?s=2265:2313#L104">Commit</a></h2>
 			<p>
 Commit
 </p>
@@ -58,17 +61,31 @@ Commit
 			<p><pre>type Commit struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
-				<h3 id="Commit.Author">func (*Commit) <a href="/?s=1852:1884#L92">Author</a></h3>
+				<h3 id="Commit.Author">func (*Commit) <a href="/?s=3065:3097#L142">Author</a></h3>
 				<p><code>func (c *Commit) Author() string</code></p>
 				
-				<h3 id="Commit.Email">func (*Commit) <a href="/?s=1956:1987#L96">Email</a></h3>
+				<h3 id="Commit.Email">func (*Commit) <a href="/?s=3169:3200#L146">Email</a></h3>
 				<p><code>func (c *Commit) Email() string</code></p>
 				
-				<h3 id="Commit.Lookup">func (*Commit) <a href="/?s=1559:1614#L79">Lookup</a></h3>
+				<h3 id="Commit.Lookup">func (*Commit) <a href="/?s=2772:2827#L129">Lookup</a></h3>
 				<p><code>func (c *Commit) Lookup(r *Repo, o *Oid) (err os.Error)</code></p>
 				
-				<h3 id="Commit.Msg">func (*Commit) <a href="/?s=1750:1779#L87">Msg</a></h3>
+				<h3 id="Commit.Msg">func (*Commit) <a href="/?s=2963:2992#L137">Msg</a></h3>
 				<p><code>func (c *Commit) Msg() string</code></p>
+				
+			<h2 id="Entry">type <a href="/?s=1993:2048#L90">Entry</a></h2>
+			<p>
+Entry
+</p>
+
+			<p><pre>type Entry struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre></p>
+				<h3 id="Entry.Filename">func (*Entry) <a href="/?s=2134:2167#L98">Filename</a></h3>
+				<p><code>func (e *Entry) Filename() string</code></p>
+				
+				<h3 id="Entry.Oid">func (*Entry) <a href="/?s=2050:2076#L94">Oid</a></h3>
+				<p><code>func (e *Entry) Oid() *Oid</code></p>
 				
 			<h2 id="GitTime">type <a href="/?s=408:459#L15">GitTime</a></h2>
 			
@@ -76,7 +93,7 @@ Commit
     Time   int64
     Offset int32
 }</pre></p>
-			<h2 id="Index">type <a href="/?s=3943:3988#L199">Index</a></h2>
+			<h2 id="Index">type <a href="/?s=5307:5352#L250">Index</a></h2>
 			<p>
 Index
 </p>
@@ -84,19 +101,19 @@ Index
 			<p><pre>type Index struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
-				<h3 id="Index.Add">func (*Index) <a href="/?s=4165:4212#L210">Add</a></h3>
+				<h3 id="Index.Add">func (*Index) <a href="/?s=5529:5576#L261">Add</a></h3>
 				<p><code>func (v *Index) Add(file string) (err os.Error)</code></p>
 				
-				<h3 id="Index.Free">func (*Index) <a href="/?s=4646:4668#L233">Free</a></h3>
+				<h3 id="Index.Free">func (*Index) <a href="/?s=6010:6032#L284">Free</a></h3>
 				<p><code>func (v *Index) Free()</code></p>
 				
-				<h3 id="Index.Open">func (*Index) <a href="/?s=3990:4037#L203">Open</a></h3>
+				<h3 id="Index.Open">func (*Index) <a href="/?s=5354:5401#L254">Open</a></h3>
 				<p><code>func (v *Index) Open(repo *Repo) (err os.Error)</code></p>
 				
-				<h3 id="Index.Read">func (*Index) <a href="/?s=4360:4397#L219">Read</a></h3>
+				<h3 id="Index.Read">func (*Index) <a href="/?s=5724:5761#L270">Read</a></h3>
 				<p><code>func (v *Index) Read() (err os.Error)</code></p>
 				
-				<h3 id="Index.Write">func (*Index) <a href="/?s=4502:4540#L226">Write</a></h3>
+				<h3 id="Index.Write">func (*Index) <a href="/?s=5866:5904#L277">Write</a></h3>
 				<p><code>func (v *Index) Write() (err os.Error)</code></p>
 				
 			<h2 id="IndexEntry">type <a href="/?s=461:823#L20">IndexEntry</a></h2>
@@ -115,7 +132,7 @@ Index
     Flags_extended uint16
     Path           *int8
 }</pre></p>
-			<h2 id="Oid">type <a href="/?s=2068:2107#L102">Oid</a></h2>
+			<h2 id="Oid">type <a href="/?s=3281:3320#L152">Oid</a></h2>
 			<p>
 Oid
 </p>
@@ -123,22 +140,25 @@ Oid
 			<p><pre>type Oid struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
-				<h3 id="Oid.GetHead">func <a href="/?s=3245:3286#L163">GetHead</a></h3>
+				<h3 id="Oid.GetHead">func <a href="/?s=4462:4503#L206">GetHead</a></h3>
 				<p><code>func GetHead(repo *Repo) (*Oid, os.Error)</code></p>
-				
-				<h3 id="Oid.NewOid">func <a href="/?s=2109:2127#L106">NewOid</a></h3>
+				<p>
+TODO: do not assume we are working on refs/heads/master
+</p>
+
+				<h3 id="Oid.NewOid">func <a href="/?s=3322:3340#L156">NewOid</a></h3>
 				<p><code>func NewOid() *Oid</code></p>
 				
-				<h3 id="Oid.NewOidString">func <a href="/?s=2162:2206#L110">NewOidString</a></h3>
+				<h3 id="Oid.NewOidString">func <a href="/?s=3375:3419#L160">NewOidString</a></h3>
 				<p><code>func NewOidString(s string) (*Oid, os.Error)</code></p>
 				
-				<h3 id="Oid.TreeFromIndex">func <a href="/?s=858:919#L45">TreeFromIndex</a></h3>
+				<h3 id="Oid.TreeFromIndex">func <a href="/?s=895:956#L48">TreeFromIndex</a></h3>
 				<p><code>func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error)</code></p>
 				
-				<h3 id="Oid.String">func (*Oid) <a href="/?s=2344:2373#L118">String</a></h3>
+				<h3 id="Oid.String">func (*Oid) <a href="/?s=3557:3586#L168">String</a></h3>
 				<p><code>func (v *Oid) String() string</code></p>
 				
-			<h2 id="Reference">type <a href="/?s=3579:3636#L182">Reference</a></h2>
+			<h2 id="Reference">type <a href="/?s=4943:5000#L233">Reference</a></h2>
 			<p>
 Reference
 </p>
@@ -146,13 +166,13 @@ Reference
 			<p><pre>type Reference struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
-				<h3 id="Reference.GetOid">func (*Reference) <a href="/?s=3845:3878#L194">GetOid</a></h3>
+				<h3 id="Reference.GetOid">func (*Reference) <a href="/?s=5209:5242#L245">GetOid</a></h3>
 				<p><code>func (v *Reference) GetOid() *Oid</code></p>
 				
-				<h3 id="Reference.Lookup">func (*Reference) <a href="/?s=3638:3701#L186">Lookup</a></h3>
+				<h3 id="Reference.Lookup">func (*Reference) <a href="/?s=5002:5065#L237">Lookup</a></h3>
 				<p><code>func (v *Reference) Lookup(r *Repo, name string) (err os.Error)</code></p>
 				
-			<h2 id="Repo">type <a href="/?s=264:312#L14">Repo</a></h2>
+			<h2 id="Repo">type <a href="/?s=244:292#L13">Repo</a></h2>
 			<p>
 Repo
 </p>
@@ -160,16 +180,16 @@ Repo
 			<p><pre>type Repo struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
-				<h3 id="Repo.Free">func (*Repo) <a href="/?s=541:562#L28">Free</a></h3>
+				<h3 id="Repo.Free">func (*Repo) <a href="/?s=521:542#L27">Free</a></h3>
 				<p><code>func (v *Repo) Free()</code></p>
 				
-				<h3 id="Repo.Init">func (*Repo) <a href="/?s=603:664#L32">Init</a></h3>
+				<h3 id="Repo.Init">func (*Repo) <a href="/?s=583:644#L31">Init</a></h3>
 				<p><code>func (v *Repo) Init(path string, isbare uint8) (err os.Error)</code></p>
 				
-				<h3 id="Repo.Open">func (*Repo) <a href="/?s=314:361#L18">Open</a></h3>
+				<h3 id="Repo.Open">func (*Repo) <a href="/?s=294:341#L17">Open</a></h3>
 				<p><code>func (v *Repo) Open(path string) (err os.Error)</code></p>
 				
-			<h2 id="RevWalk">type <a href="/?s=2489:2540#L126">RevWalk</a></h2>
+			<h2 id="RevWalk">type <a href="/?s=3702:3753#L176">RevWalk</a></h2>
 			<p>
 RevWalk
 </p>
@@ -177,42 +197,47 @@ RevWalk
 			<p><pre>type RevWalk struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
-				<h3 id="RevWalk.NewRevWalk">func <a href="/?s=2542:2590#L130">NewRevWalk</a></h3>
+				<h3 id="RevWalk.NewRevWalk">func <a href="/?s=3755:3803#L180">NewRevWalk</a></h3>
 				<p><code>func NewRevWalk(repo *Repo) (*RevWalk, os.Error)</code></p>
 				
-				<h3 id="RevWalk.Free">func (*RevWalk) <a href="/?s=3502:3526#L177">Free</a></h3>
+				<h3 id="RevWalk.Free">func (*RevWalk) <a href="/?s=4866:4890#L228">Free</a></h3>
 				<p><code>func (v *RevWalk) Free()</code></p>
 				
-				<h3 id="RevWalk.Next">func (*RevWalk) <a href="/?s=2883:2928#L146">Next</a></h3>
+				<h3 id="RevWalk.Next">func (*RevWalk) <a href="/?s=4252:4297#L198">Next</a></h3>
 				<p><code>func (v *RevWalk) Next(o *Oid) (err os.Error)</code></p>
-				
-				<h3 id="RevWalk.Push">func (*RevWalk) <a href="/?s=2801:2831#L142">Push</a></h3>
+				<p>
+TODO: end of walk produces a LastError figure out how to reset it and return a os.EOF instead
+possibly return a Oid? Would make for less boiler plate.
+</p>
+
+				<h3 id="RevWalk.Push">func (*RevWalk) <a href="/?s=4014:4044#L192">Push</a></h3>
 				<p><code>func (v *RevWalk) Push(o *Oid)</code></p>
 				
-				<h3 id="RevWalk.Reset">func (*RevWalk) <a href="/?s=2734:2759#L138">Reset</a></h3>
+				<h3 id="RevWalk.Reset">func (*RevWalk) <a href="/?s=3947:3972#L188">Reset</a></h3>
 				<p><code>func (v *RevWalk) Reset()</code></p>
 				
-				<h3 id="RevWalk.Sorting">func (*RevWalk) <a href="/?s=3462:3496#L174">Sorting</a></h3>
+				<h3 id="RevWalk.Sorting">func (*RevWalk) <a href="/?s=4826:4860#L225">Sorting</a></h3>
 				<p><code>func (v *RevWalk) Sorting(sm uint)</code></p>
 				<p>
 TODO: implement this
 </p>
 
-			<h2 id="Signature">type <a href="/?s=4718:4775#L238">Signature</a></h2>
+			<h2 id="Signature">type <a href="/?s=6144:6201#L290">Signature</a></h2>
 			<p>
+TODO: its possible we can use godef to generate this struct
 Signature
 </p>
 
 			<p><pre>type Signature struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
-				<h3 id="Signature.NewSignature">func <a href="/?s=4777:4825#L242">NewSignature</a></h3>
+				<h3 id="Signature.NewSignature">func <a href="/?s=6203:6251#L294">NewSignature</a></h3>
 				<p><code>func NewSignature(name, email string) *Signature</code></p>
 				
-			<h2 id="Test">type <a href="/?s=227:254#L11">Test</a></h2>
+			<h2 id="Test">type <a href="/?s=207:234#L10">Test</a></h2>
 			
 			<p><pre>type Test *C.git_repository</pre></p>
-			<h2 id="Tree">type <a href="/?s=814:856#L41">Tree</a></h2>
+			<h2 id="Tree">type <a href="/?s=794:836#L40">Tree</a></h2>
 			<p>
 Tree
 </p>
@@ -220,3 +245,18 @@ Tree
 			<p><pre>type Tree struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre></p>
+				<h3 id="Tree.TreeFromCommit">func <a href="/?s=1119:1184#L57">TreeFromCommit</a></h3>
+				<p><code>func TreeFromCommit(repo *Repo, commit *Commit) (*Tree, os.Error)</code></p>
+				
+				<h3 id="Tree.EntryByIndex">func (*Tree) <a href="/?s=1622:1679#L75">EntryByIndex</a></h3>
+				<p><code>func (t *Tree) EntryByIndex(index int) (*Entry, os.Error)</code></p>
+				
+				<h3 id="Tree.EntryByName">func (*Tree) <a href="/?s=1345:1407#L66">EntryByName</a></h3>
+				<p><code>func (t *Tree) EntryByName(filename string) (*Entry, os.Error)</code></p>
+				
+				<h3 id="Tree.EntryCount">func (*Tree) <a href="/?s=1888:1919#L84">EntryCount</a></h3>
+				<p><code>func (t *Tree) EntryCount() int</code></p>
+				
+				<h3 id="Tree.Free">func (*Tree) <a href="/?s=838:859#L44">Free</a></h3>
+				<p><code>func (t *Tree) Free()</code></p>
+				

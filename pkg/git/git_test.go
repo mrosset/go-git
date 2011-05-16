@@ -191,10 +191,10 @@ func TestTreeFromCommit(t *testing.T) {
 func TestTreeEntryByName(t *testing.T) {
 	expected := "README"
 	entry, err := tree.EntryByName(expected)
-	if (err != nil) {
+	if err != nil {
 		t.Fatal("Expected to find a file, but was unable to.")
 	}
-	if (entry.Filename() != expected) {
+	if entry.Filename() != expected {
 		t.Fatal("EntryByName did not return the proper file. Expected %v, got %v",
 			expected,
 			entry.Filename())
@@ -205,7 +205,7 @@ func TestTreeEntryByName(t *testing.T) {
 func TestInvalidTreeEntryByName(t *testing.T) {
 	expected := "README.does-not-exist"
 	_, err := tree.EntryByName(expected)
-	if (err == nil) {
+	if err == nil {
 		t.Fatal("Was expecting a does not exist error, but did not recieve one.")
 	}
 }
@@ -213,10 +213,10 @@ func TestInvalidTreeEntryByName(t *testing.T) {
 func TestTreeEntryByIndex(t *testing.T) {
 	expected := "README"
 	entry, err := tree.EntryByIndex(0)
-	if (err != nil) {
+	if err != nil {
 		t.Fatal("Was unable to find the first entry via index.")
 	}
-	if (entry.Filename() != expected) {
+	if entry.Filename() != expected {
 		t.Fatalf(
 			"EntryByIndex did not return the proper file. Expected %v, got %v",
 			expected,
@@ -225,7 +225,7 @@ func TestTreeEntryByIndex(t *testing.T) {
 }
 
 func TestTreeEntryCount(t *testing.T) {
-	if (tree.EntryCount() != 1) {
+	if tree.EntryCount() != 1 {
 		t.Fatalf("Expected 1 file in the tree, but there were %v", tree.EntryCount())
 	}
 }

@@ -3,7 +3,6 @@ package git
 /*
 #cgo CFLAGS: -O2 -pipe -march=native -mtune=native
 #cgo LDFLAGS: -lgit2 -lcrypto -ldl -lz 
-#include <stdlib.h>
 #include <git2.h>
 */
 import "C"
@@ -77,23 +76,22 @@ func TreeFromCommit(repo *Repo, commit *Commit) (*Tree, os.Error) {
 func (t *Tree) EntryByName(filename string) (*Entry, os.Error) {
 	entry := new(Entry)
 	entry.git_tree_entry = C.git_tree_entry_byname(t.git_tree, C.CString(filename))
-	if (entry.git_tree_entry == nil) {
+	if entry.git_tree_entry == nil {
 		return nil, os.NewError("Unable to find entry.")
 	}
 	return entry, nil
 }
-
 
 func (t *Tree) EntryByIndex(index int) (*Entry, os.Error) {
 	entry := new(Entry)
 	entry.git_tree_entry = C.git_tree_entry_byindex(t.git_tree, C.int(index))
-	if (entry.git_tree_entry == nil) {
+	if entry.git_tree_entry == nil {
 		return nil, os.NewError("Unable to find entry.")
 	}
 	return entry, nil
 }
 
-func (t *Tree) EntryCount() (int) {
+func (t *Tree) EntryCount() int {
 	num := C.git_tree_entrycount(t.git_tree)
 	return int(num)
 }
@@ -103,11 +101,11 @@ type Entry struct {
 	git_tree_entry *C.git_tree_entry
 }
 
-func (e *Entry) Oid() (*Oid) {
+func (e *Entry) Oid() *Oid {
 	return &Oid{C.git_tree_entry_id(e.git_tree_entry)}
 }
 
-func (e *Entry) Filename() (string) {
+func (e *Entry) Filename() string {
 	filename := C.git_tree_entry_name(e.git_tree_entry)
 	return C.GoString(filename)
 }
@@ -117,6 +115,7 @@ type Commit struct {
 	git_commit *C.git_commit
 }
 
+//TODO: do not use hardcoded update_ref
 func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, message string) os.Error {
 	m := C.CString(message)
 	oid := NewOid()
@@ -204,6 +203,8 @@ func (v *RevWalk) Push(o *Oid) {
 	C.git_revwalk_push(v.git_revwalk, o.git_oid)
 }
 
+//TODO: end of walk produces a LastError figure out how to reset it and return a os.EOF instead
+// possibly return a Oid? Would make for less boiler plate.
 func (v *RevWalk) Next(o *Oid) (err os.Error) {
 	if C.git_revwalk_next(o.git_oid, v.git_revwalk) < GIT_SUCCESS {
 		return LastError()
@@ -211,6 +212,7 @@ func (v *RevWalk) Next(o *Oid) (err os.Error) {
 	return err
 }
 
+//TODO: do not assume we are working on refs/heads/master
 func GetHead(repo *Repo) (*Oid, os.Error) {
 	ref := new(Reference)
 	err := ref.Lookup(repo, "refs/heads/master")
@@ -293,6 +295,7 @@ func (v *Index) Free() {
 	C.git_index_free(v.git_index)
 }
 
+//TODO: its possible we can use godef to generate this struct
 // Signature
 type Signature struct {
 	git_signature *C.git_signature
