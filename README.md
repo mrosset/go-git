@@ -19,5 +19,5 @@ Installation
                              # or use vanilla git.
     cd go-git
     make libgit2-build
-    sudo make libgit-install
+    sudo make libgit2-install
     goinstall github.com/str1ngs/go-git/pkg/git
