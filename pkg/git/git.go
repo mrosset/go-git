@@ -65,16 +65,52 @@ func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
 	return oid, nil
 }
 
-func TreeFromOid(repo *Repo, oid *Oid) (*Tree, os.Error) {
+func TreeFromCommit(repo *Repo, commit *Commit) (*Tree, os.Error) {
 	tree := new(Tree)
-	ecode := C.git_tree_lookup(&tree.git_tree, repo.git_repo, oid.git_oid)
-	fmt.Printf("Error: %v\n", ecode)
+	ecode := C.git_commit_tree(&tree.git_tree, commit.git_commit)
 	if ecode < GIT_SUCCESS {
 		return nil, LastError()
 	}
 	return tree, nil
 }
 
+func (t *Tree) EntryByName(filename string) (*Entry, os.Error) {
+	entry := new(Entry)
+	entry.git_tree_entry = C.git_tree_entry_byname(t.git_tree, C.CString(filename))
+	if (entry.git_tree_entry == nil) {
+		return nil, os.NewError("Unable to find entry.")
+	}
+	return entry, nil
+}
+
+
+func (t *Tree) EntryByIndex(index int) (*Entry, os.Error) {
+	entry := new(Entry)
+	entry.git_tree_entry = C.git_tree_entry_byindex(t.git_tree, C.int(index))
+	if (entry.git_tree_entry == nil) {
+		return nil, os.NewError("Unable to find entry.")
+	}
+	return entry, nil
+}
+
+func (t *Tree) EntryCount() (int) {
+	num := C.git_tree_entrycount(t.git_tree)
+	return int(num)
+}
+
+// Entry
+type Entry struct {
+	git_tree_entry *C.git_tree_entry
+}
+
+func (e *Entry) Oid() (*Oid) {
+	return &Oid{C.git_tree_entry_id(e.git_tree_entry)}
+}
+
+func (e *Entry) Filename() (string) {
+	filename := C.git_tree_entry_name(e.git_tree_entry)
+	return C.GoString(filename)
+}
 
 // Commit
 type Commit struct {
