@@ -17,11 +17,7 @@ Installation
     sudo apt-get install libssl-dev # for libcypto dependency
     hub clone str1ngs/go-git # if you don't have hub, see defunkt/hub
                              # or use vanilla git.
-    pushd go-git
-    make module
-    pushd libgit2
-    ./waf configure
-    ./waf build
-    sudo ./waf install
-    popd && popd
+    cd go-git
+    make libgit2-build
+    sudo make libgit-install
     goinstall github.com/str1ngs/go-git/pkg/git
