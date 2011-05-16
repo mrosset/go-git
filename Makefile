@@ -18,7 +18,7 @@ install: pkg
 	make -C pkg/git install
 
 libgit2-init:
-	@git submodule update libgit2
+	@git submodule update --init libgit2
 
 libgit2-build: libgit2-init
 	cd libgit2; ./waf configure
