@@ -2,6 +2,7 @@ package git
 
 import (
 	"exec"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -13,7 +14,7 @@ var (
 	tree    *Tree
 	path    string
 	author  string
-	ref     = &Reference{}
+	ref     = new(Reference)
 )
 
 func init() {
@@ -47,37 +48,23 @@ func TestInitNotBare(t *testing.T) {
 
 func TestOpenNotBare(t *testing.T) {
 	err := repo.Open(path + "/.git")
-	if err != nil {
-		t.Fatal("Error:", err)
-	}
+	checkFatal(t, err)
 }
 
 //FIXME: figure out how to seed an intial HEAD
 func TestSeed(t *testing.T) {
-	var (
-		cmd *exec.Cmd
-	)
-
 	tmpfile := "README"
-
 	f, err := os.Create(path + "/" + tmpfile)
 	_, err = f.WriteString("foo\n")
 	f.Close()
-	if err != nil {
-		println(err.String())
-		os.Exit(1)
-	}
-	cmd, err = run("git add " + tmpfile)
-	cmd.Close()
-	cmd, err = run("git commit -m test")
-	cmd.Close()
-
-	if err != nil {
-		t.Fatal("Error:", err)
-	}
+	checkFatal(t, err)
+	err = run("git add " + tmpfile)
+	checkFatal(t, err)
+	err = run("git commit -m test")
+	checkFatal(t, err)
 }
 
-// Index
+// Index 
 func TestIndexAdd(t *testing.T) {
 	index := new(Index)
 	defer index.Free()
@@ -85,6 +72,7 @@ func TestIndexAdd(t *testing.T) {
 	check(t, err)
 	tmpfile := "README"
 	f, err := os.OpenFile(path+"/"+tmpfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+	check(t, err)
 	_, err = f.WriteString("foo\n")
 	f.Close()
 	err = index.Add(tmpfile)
@@ -102,14 +90,13 @@ func TestCommit(t *testing.T) {
 	check(t, err)
 	tree, err := TreeFromIndex(repo, index)
 	check(t, err)
-	head, _ := GetHeadString(repo)
-	parent, err := NewOidString(head)
+	head, err := GetHead(repo)
 	check(t, err)
 	s := NewSignature("Foo Bar", "foo@bar.com")
-	err = CommitCreate(repo, tree, parent, s, s, "some stuff here")
+	defer s.Free()
+	err = CommitCreate(repo, tree, head, s, s, "some stuff here")
 	check(t, err)
 }
-
 func TestManyCommits(t *testing.T) {
 	for i := 0; i < 29; i++ {
 		TestCommit(t)
@@ -150,7 +137,7 @@ func TestRevWalk(t *testing.T) {
 		c := new(Commit)
 		c.Lookup(repo, o)
 		// Output example
-		//fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
+		fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
 	}
 }
 
@@ -166,6 +153,9 @@ func TestNewOid(t *testing.T) {
 // Singature
 func TestSignature(t *testing.T) {
 	NewSignature("foo", "bar")
+}
+
+func TestTSignature(t *testing.T) {
 }
 
 // Tree
@@ -230,9 +220,11 @@ func TestTreeEntryCount(t *testing.T) {
 	}
 }
 
-
 // Important: this must be called after all of the Test functions
 func TestFinal(t *testing.T) {
+	if tree != nil {
+		tree.Free()
+	}
 	if revwalk != nil {
 		revwalk.Free()
 	}
@@ -242,14 +234,30 @@ func TestFinal(t *testing.T) {
 }
 
 // private helper functions
-func run(s string) (cmd *exec.Cmd, err os.Error) {
-	wd := "./tmp/"
+func run(s string) (err os.Error) {
+	wd := path
 	args := strings.Split(s, " ", -1)
 	bin, err := exec.LookPath(args[0])
 
-	cmd, err = exec.Run(bin, args, os.Environ(), wd, exec.DevNull, exec.Pipe, exec.PassThrough)
-
+	cmd, err := exec.Run(bin, args, os.Environ(), wd, exec.DevNull, exec.Pipe, exec.PassThrough)
+	if err != nil {
+		return err
+	}
+	w, err := cmd.Wait(0)
+	if err != nil {
+		return err
+	}
+	if !w.Exited() || w.ExitStatus() != 0 {
+		return os.NewError("failed to run " + s)
+	}
 	return
+}
+
+func checkFatal(t *testing.T, err os.Error) {
+	if err != nil {
+		fmt.Printf("Fatal: %T %v\n", t, err)
+		os.Exit(0)
+	}
 }
 
 func check(t *testing.T, err os.Error) {

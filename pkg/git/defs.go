@@ -16,6 +16,7 @@ const (
 	GIT_OBJ_TAG       = 0x4
 	GIT_OBJ_TREE      = 0x2
 	GIT_OBJ__EXT2     = 0x5
+	GIT_REF_SYMBOLIC  = 0x2
 	GIT_SUCCESS       = 0
 	GIT_ENOTOID       = -0x2
 )
@@ -23,18 +24,20 @@ const (
 // Types
 
 type GitTime struct {
-	Time   int64
-	Offset int32
+	Time         int64
+	Offset       int32
+	Pad_godefs_0 [4]byte
 }
 
 type IndexEntry struct {
-	Ctime          [12]byte /* git_index_time */
-	Mtime          [12]byte /* git_index_time */
+	Ctime          [16]byte /* git_index_time */
+	Mtime          [16]byte /* git_index_time */
 	Dev            uint32
 	Ino            uint32
 	Mode           uint32
 	Uid            uint32
 	Gid            uint32
+	Pad_godefs_0   [4]byte
 	File_size      int64
 	Oid            [20]byte /* git_oid */
 	Flags          uint16

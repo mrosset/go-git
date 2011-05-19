@@ -117,9 +117,11 @@ type Commit struct {
 
 //TODO: do not use hardcoded update_ref
 func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, message string) os.Error {
-	m := C.CString(message)
 	oid := NewOid()
+	m := C.CString(message)
+	defer C.free(unsafe.Pointer(m))
 	update_ref := C.CString("HEAD")
+	defer C.free(unsafe.Pointer(update_ref))
 	ecode := C.git_commit_create(
 		oid.git_oid,
 		repo.git_repo,
@@ -219,7 +221,10 @@ func GetHead(repo *Repo) (*Oid, os.Error) {
 	if err != nil {
 		return nil, err
 	}
-	head := ref.GetOid()
+	head, err := ref.GetOid()
+	if err != nil {
+		return nil, err
+	}
 	return head, nil
 }
 
@@ -249,11 +254,34 @@ func (v *Reference) Lookup(r *Repo, name string) (err os.Error) {
 	if ecode < GIT_SUCCESS {
 		return LastError()
 	}
+	if v.git_reference == nil {
+		//return os.NewError("Reference Lookup: Failed to look up " + name)
+	}
 	return
 }
 
-func (v *Reference) GetOid() *Oid {
-	return &Oid{C.git_reference_oid(v.git_reference)}
+func (v *Reference) SetTarget(target string) (err os.Error) {
+	ctarget := C.CString(target)
+	defer C.free(unsafe.Pointer(ctarget))
+	ecode := C.git_reference_set_target(v.git_reference, ctarget)
+	if ecode < GIT_SUCCESS {
+		return LastError()
+	}
+	return nil
+}
+
+func (v *Reference) Type() {
+	if C.git_reference_type(v.git_reference) == GIT_REF_SYMBOLIC {
+		println("THIS IS A SYMBOLIC REF")
+	}
+}
+
+func (v *Reference) GetOid() (*Oid, os.Error) {
+	oid := C.git_reference_oid(v.git_reference)
+	if oid == nil {
+		//return nil, os.NewError("GetOid Failed: unable to get Oid for reference")
+	}
+	return &Oid{oid}, nil
 }
 
 //Index
@@ -301,6 +329,10 @@ type Signature struct {
 	git_signature *C.git_signature
 }
 
+func (s Signature) Free() {
+	C.git_signature_free(s.git_signature)
+}
+
 func NewSignature(name, email string) *Signature {
 	n := C.CString(name)
 	e := C.CString(email)
@@ -319,4 +351,9 @@ func LastError() os.Error {
 //Private
 func printT(i interface{}) {
 	fmt.Printf("%T = %v\n", i, i)
+}
+
+func abort() {
+	fmt.Println("GOT ****************************** HERE")
+	os.Exit(0)
 }
