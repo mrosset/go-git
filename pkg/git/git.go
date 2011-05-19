@@ -55,6 +55,15 @@ func (t *Tree) Free() {
 	C.git_tree_close(t.git_tree)
 }
 
+func TreeLookup(repo *Repo, oid *Oid) (*Tree, os.Error) {
+	tree := new(Tree)
+	ecode := C.git_tree_lookup(&tree.git_tree, repo.git_repo, oid.git_oid)
+	if ecode < GIT_SUCCESS {
+		return nil, LastError()
+	}
+	return tree, nil
+}
+
 func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
 	oid := NewOid()
 	ecode := C.git_tree_create_fromindex(oid.git_oid, index.git_index)
@@ -291,7 +300,8 @@ type Index struct {
 
 func (v *Index) Open(repo *Repo) (err os.Error) {
 	if ecode := C.git_index_open_inrepo(&v.git_index, repo.git_repo); ecode != GIT_SUCCESS {
-		return LastError()
+		estring := fmt.Sprintf("failed to open index error code %v", ecode)
+		return os.NewError(estring)
 	}
 	return
 }
@@ -317,6 +327,10 @@ func (v *Index) Write() (err os.Error) {
 		return LastError()
 	}
 	return
+}
+
+func (v *Index) EntryCount() int {
+	return int(C.git_index_entrycount(v.git_index))
 }
 
 func (v *Index) Free() {

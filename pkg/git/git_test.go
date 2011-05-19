@@ -64,6 +64,7 @@ func TestSeed(t *testing.T) {
 	checkFatal(t, err)
 }
 
+
 // Index 
 func TestIndexAdd(t *testing.T) {
 	index := new(Index)
@@ -79,6 +80,19 @@ func TestIndexAdd(t *testing.T) {
 	check(t, err)
 	err = index.Write()
 	check(t, err)
+}
+
+func TestIndexEntryCount(t *testing.T) {
+	expected := 1
+	index := new(Index)
+	defer index.Free()
+	err := index.Open(repo)
+	check(t, err)
+	err = index.Read()
+	check(t, err)
+	if index.EntryCount() != expected {
+		t.Fatalf("Expected 1 Entry count in the index, but there were %v", index.EntryCount())
+	}
 }
 
 // Commit
@@ -159,6 +173,7 @@ func TestTSignature(t *testing.T) {
 }
 
 // Tree
+
 func TestTreeFromIndex(t *testing.T) {
 	index := new(Index)
 	defer index.Free()
@@ -166,6 +181,18 @@ func TestTreeFromIndex(t *testing.T) {
 	check(t, err)
 	_, err = TreeFromIndex(repo, index)
 	check(t, err)
+}
+
+func TestTreeLookup(t *testing.T) {
+	index := new(Index)
+	defer index.Free()
+	err := index.Open(repo)
+	check(t, err)
+	oid, err := TreeFromIndex(repo, index)
+	check(t, err)
+	tree, err := TreeLookup(repo, oid)
+	check(t, err)
+	tree.Free()
 }
 
 func TestTreeFromCommit(t *testing.T) {
