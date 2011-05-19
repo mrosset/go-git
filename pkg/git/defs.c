@@ -20,4 +20,3 @@ enum
 };
 
 typedef struct git_time $GitTime;
-typedef struct git_index_entry $IndexEntry;

@@ -95,6 +95,27 @@ func TestIndexEntryCount(t *testing.T) {
 	}
 }
 
+func TestIndexGet(t *testing.T) {
+	path := "README"
+	flags := 6
+	index := new(Index)
+	defer index.Free()
+	err := index.Open(repo)
+	check(t, err)
+	err = index.Read()
+	check(t, err)
+	entry, err := index.Get(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if entry.Path() != path {
+		t.Errorf("Expected Entry Path %v, got %v", path, index.EntryCount())
+	}
+	if entry.Flags() != flags {
+		t.Errorf("Expected Entry Flags %v, got %v", flags, index.EntryCount())
+	}
+}
+
 // Commit
 func TestCommit(t *testing.T) {
 	TestIndexAdd(t)
@@ -151,7 +172,7 @@ func TestRevWalk(t *testing.T) {
 		c := new(Commit)
 		c.Lookup(repo, o)
 		// Output example
-		fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
+		//fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
 	}
 }
 
@@ -217,7 +238,6 @@ func TestTreeEntryByName(t *testing.T) {
 			entry.Filename())
 	}
 }
-
 
 func TestInvalidTreeEntryByName(t *testing.T) {
 	expected := "README.does-not-exist"

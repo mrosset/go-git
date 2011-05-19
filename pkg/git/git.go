@@ -288,7 +288,7 @@ func (v *Reference) Type() {
 func (v *Reference) GetOid() (*Oid, os.Error) {
 	oid := C.git_reference_oid(v.git_reference)
 	if oid == nil {
-		//return nil, os.NewError("GetOid Failed: unable to get Oid for reference")
+		return nil, os.NewError("GetOid Failed: unable to get Oid for reference")
 	}
 	return &Oid{oid}, nil
 }
@@ -333,8 +333,36 @@ func (v *Index) EntryCount() int {
 	return int(C.git_index_entrycount(v.git_index))
 }
 
+func (v *Index) Get(n int) (*IndexEntry, os.Error) {
+	p := C.git_index_get(v.git_index, C.int(n))
+	if p == nil {
+		estring := fmt.Sprintf("Index %v not found, total index is %v", n, v.EntryCount())
+		return nil, os.NewError(estring)
+	}
+	//entry := (*IndexEntry)(unsafe.Pointer(p))
+	return &IndexEntry{p}, nil
+}
+
 func (v *Index) Free() {
 	C.git_index_free(v.git_index)
+}
+
+// IndexEntry
+
+type IndexEntry struct {
+	index_entry *C.git_index_entry
+}
+
+func (i *IndexEntry) Oid() *Oid {
+	return &Oid{&i.index_entry.oid}
+}
+
+func (i *IndexEntry) Path() string {
+	return C.GoString(i.index_entry.path)
+}
+
+func (i *IndexEntry) Flags() int {
+	return int(i.index_entry.flags)
 }
 
 //TODO: its possible we can use godef to generate this struct

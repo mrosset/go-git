@@ -28,19 +28,3 @@ type GitTime struct {
 	Offset       int32
 	Pad_godefs_0 [4]byte
 }
-
-type IndexEntry struct {
-	Ctime          [16]byte /* git_index_time */
-	Mtime          [16]byte /* git_index_time */
-	Dev            uint32
-	Ino            uint32
-	Mode           uint32
-	Uid            uint32
-	Gid            uint32
-	Pad_godefs_0   [4]byte
-	File_size      int64
-	Oid            [20]byte /* git_oid */
-	Flags          uint16
-	Flags_extended uint16
-	Path           *int8
-}
