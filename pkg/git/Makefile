@@ -1,7 +1,5 @@
 include $(GOROOT)/src/Make.inc
 
-export LD_LIBRARY_PATH:=/usr/local/lib
-
 TARG=git
 
 CGOFILES=git.go

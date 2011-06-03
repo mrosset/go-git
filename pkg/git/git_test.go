@@ -4,7 +4,6 @@ import (
 	"exec"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -58,9 +57,9 @@ func TestSeed(t *testing.T) {
 	_, err = f.WriteString("foo\n")
 	f.Close()
 	checkFatal(t, err)
-	err = run("git add " + tmpfile)
+	err = run([]string{"git", "add", tmpfile})
 	checkFatal(t, err)
-	err = run("git commit -m test")
+	err = run([]string{"git", "commit", "-m", "test"})
 	checkFatal(t, err)
 }
 
@@ -160,10 +159,6 @@ func TestRevWalkNext(t *testing.T) {
 }
 
 func TestRevWalk(t *testing.T) {
-	r := new(Repo)
-	defer r.Free()
-	err := r.Open("./tmp/.git")
-	check(t, err)
 	o := NewOid()
 	for {
 		if err := revwalk.Next(o); err != nil {
@@ -281,21 +276,12 @@ func TestFinal(t *testing.T) {
 }
 
 // private helper functions
-func run(s string) (err os.Error) {
-	wd := path
-	args := strings.Split(s, " ", -1)
-	bin, err := exec.LookPath(args[0])
-
-	cmd, err := exec.Run(bin, args, os.Environ(), wd, exec.DevNull, exec.Pipe, exec.PassThrough)
+func run(args []string) (err os.Error) {
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Dir = path
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
-	}
-	w, err := cmd.Wait(0)
-	if err != nil {
-		return err
-	}
-	if !w.Exited() || w.ExitStatus() != 0 {
-		return os.NewError("failed to run " + s)
+		return os.NewError(err.String() + " " + string(output))
 	}
 	return
 }

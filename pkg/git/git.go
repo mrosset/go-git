@@ -1,8 +1,7 @@
 package git
 
 /*
-#cgo CFLAGS: -O2 -pipe -march=native -mtune=native
-#cgo LDFLAGS: -lgit2 -lcrypto -ldl -lz 
+#cgo pkg-config: libgit2
 #include <git2.h>
 */
 import "C"
