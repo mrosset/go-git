@@ -1,9 +1,10 @@
 package git
 
 import (
-	"exec"
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"testing"
 )
 
@@ -62,7 +63,6 @@ func TestSeed(t *testing.T) {
 	err = run([]string{"git", "commit", "-m", "test"})
 	checkFatal(t, err)
 }
-
 
 // Index 
 func TestIndexAdd(t *testing.T) {
@@ -139,7 +139,7 @@ func TestManyCommits(t *testing.T) {
 
 // RevWalk
 func TestNewRevWalk(t *testing.T) {
-	var err os.Error
+	var err error
 	revwalk, err = NewRevWalk(repo)
 	if err != nil {
 		t.Fatal("Error:", err)
@@ -276,24 +276,24 @@ func TestFinal(t *testing.T) {
 }
 
 // private helper functions
-func run(args []string) (err os.Error) {
+func run(args []string) (err error) {
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Dir = path
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return os.NewError(err.String() + " " + string(output))
+		return errors.New(err.Error() + " " + string(output))
 	}
 	return
 }
 
-func checkFatal(t *testing.T, err os.Error) {
+func checkFatal(t *testing.T, err error) {
 	if err != nil {
 		fmt.Printf("Fatal: %T %v\n", t, err)
 		os.Exit(0)
 	}
 }
 
-func check(t *testing.T, err os.Error) {
+func check(t *testing.T, err error) {
 	if err != nil {
 		t.Error(err)
 	}

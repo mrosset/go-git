@@ -6,6 +6,7 @@ package git
 */
 import "C"
 import (
+	"errors"
 	"fmt"
 	"os"
 	"unsafe"
@@ -23,7 +24,7 @@ type Repo struct {
 	git_repo *C.git_repository
 }
 
-func (v *Repo) Open(path string) (err os.Error) {
+func (v *Repo) Open(path string) (err error) {
 	cpath := C.CString(path)
 	defer C.free(unsafe.Pointer(cpath))
 	ecode := C.git_repository_open(&v.git_repo, cpath)
@@ -37,7 +38,7 @@ func (v *Repo) Free() {
 	C.git_repository_free(v.git_repo)
 }
 
-func (v *Repo) Init(path string, isbare uint8) (err os.Error) {
+func (v *Repo) Init(path string, isbare uint8) (err error) {
 	ecode := C.git_repository_init(&v.git_repo, C.CString(path), C.uint(isbare))
 	if ecode < GIT_SUCCESS {
 		return LastError()
@@ -54,7 +55,7 @@ func (t *Tree) Free() {
 	C.git_tree_close(t.git_tree)
 }
 
-func TreeLookup(repo *Repo, oid *Oid) (*Tree, os.Error) {
+func TreeLookup(repo *Repo, oid *Oid) (*Tree, error) {
 	tree := new(Tree)
 	ecode := C.git_tree_lookup(&tree.git_tree, repo.git_repo, oid.git_oid)
 	if ecode < GIT_SUCCESS {
@@ -63,7 +64,7 @@ func TreeLookup(repo *Repo, oid *Oid) (*Tree, os.Error) {
 	return tree, nil
 }
 
-func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
+func TreeFromIndex(repo *Repo, index *Index) (*Oid, error) {
 	oid := NewOid()
 	ecode := C.git_tree_create_fromindex(oid.git_oid, index.git_index)
 	if ecode < GIT_SUCCESS {
@@ -72,7 +73,7 @@ func TreeFromIndex(repo *Repo, index *Index) (*Oid, os.Error) {
 	return oid, nil
 }
 
-func TreeFromCommit(repo *Repo, commit *Commit) (*Tree, os.Error) {
+func TreeFromCommit(repo *Repo, commit *Commit) (*Tree, error) {
 	tree := new(Tree)
 	ecode := C.git_commit_tree(&tree.git_tree, commit.git_commit)
 	if ecode < GIT_SUCCESS {
@@ -81,20 +82,20 @@ func TreeFromCommit(repo *Repo, commit *Commit) (*Tree, os.Error) {
 	return tree, nil
 }
 
-func (t *Tree) EntryByName(filename string) (*Entry, os.Error) {
+func (t *Tree) EntryByName(filename string) (*Entry, error) {
 	entry := new(Entry)
 	entry.git_tree_entry = C.git_tree_entry_byname(t.git_tree, C.CString(filename))
 	if entry.git_tree_entry == nil {
-		return nil, os.NewError("Unable to find entry.")
+		return nil, errors.New("Unable to find entry.")
 	}
 	return entry, nil
 }
 
-func (t *Tree) EntryByIndex(index int) (*Entry, os.Error) {
+func (t *Tree) EntryByIndex(index int) (*Entry, error) {
 	entry := new(Entry)
 	entry.git_tree_entry = C.git_tree_entry_byindex(t.git_tree, C.int(index))
 	if entry.git_tree_entry == nil {
-		return nil, os.NewError("Unable to find entry.")
+		return nil, errors.New("Unable to find entry.")
 	}
 	return entry, nil
 }
@@ -124,7 +125,7 @@ type Commit struct {
 }
 
 //TODO: do not use hardcoded update_ref
-func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, message string) os.Error {
+func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, message string) error {
 	oid := NewOid()
 	m := C.CString(message)
 	defer C.free(unsafe.Pointer(m))
@@ -146,7 +147,7 @@ func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, me
 	return nil
 }
 
-func (c *Commit) Lookup(r *Repo, o *Oid) (err os.Error) {
+func (c *Commit) Lookup(r *Repo, o *Oid) (err error) {
 	ecode := C.git_commit_lookup(&c.git_commit, r.git_repo, o.git_oid)
 	if ecode < GIT_SUCCESS {
 		return LastError()
@@ -177,7 +178,7 @@ func NewOid() *Oid {
 	return &Oid{new(C.git_oid)}
 }
 
-func NewOidString(s string) (*Oid, os.Error) {
+func NewOidString(s string) (*Oid, error) {
 	o := &Oid{new(C.git_oid)}
 	if C.git_oid_mkstr(o.git_oid, C.CString(s)) < GIT_SUCCESS {
 		return nil, LastError()
@@ -197,7 +198,7 @@ type RevWalk struct {
 	git_revwalk *C.git_revwalk
 }
 
-func NewRevWalk(repo *Repo) (*RevWalk, os.Error) {
+func NewRevWalk(repo *Repo) (*RevWalk, error) {
 	rev := new(RevWalk)
 	if C.git_revwalk_new(&rev.git_revwalk, repo.git_repo) < GIT_SUCCESS {
 		return nil, LastError()
@@ -215,7 +216,7 @@ func (v *RevWalk) Push(o *Oid) {
 
 //TODO: end of walk produces a LastError figure out how to reset it and return a os.EOF instead
 // possibly return a Oid? Would make for less boiler plate.
-func (v *RevWalk) Next(o *Oid) (err os.Error) {
+func (v *RevWalk) Next(o *Oid) (err error) {
 	if C.git_revwalk_next(o.git_oid, v.git_revwalk) < GIT_SUCCESS {
 		return LastError()
 	}
@@ -223,7 +224,7 @@ func (v *RevWalk) Next(o *Oid) (err os.Error) {
 }
 
 //TODO: do not assume we are working on refs/heads/master
-func GetHead(repo *Repo) (*Oid, os.Error) {
+func GetHead(repo *Repo) (*Oid, error) {
 	ref := new(Reference)
 	err := ref.Lookup(repo, "refs/heads/master")
 	if err != nil {
@@ -236,7 +237,7 @@ func GetHead(repo *Repo) (*Oid, os.Error) {
 	return head, nil
 }
 
-func GetHeadString(repo *Repo) (string, os.Error) {
+func GetHeadString(repo *Repo) (string, error) {
 	head, err := GetHead(repo)
 	if err != nil {
 		return "", err
@@ -257,7 +258,7 @@ type Reference struct {
 	git_reference *C.git_reference
 }
 
-func (v *Reference) Lookup(r *Repo, name string) (err os.Error) {
+func (v *Reference) Lookup(r *Repo, name string) (err error) {
 	ecode := C.git_reference_lookup(&v.git_reference, r.git_repo, C.CString(name))
 	if ecode < GIT_SUCCESS {
 		return LastError()
@@ -268,7 +269,7 @@ func (v *Reference) Lookup(r *Repo, name string) (err os.Error) {
 	return
 }
 
-func (v *Reference) SetTarget(target string) (err os.Error) {
+func (v *Reference) SetTarget(target string) (err error) {
 	ctarget := C.CString(target)
 	defer C.free(unsafe.Pointer(ctarget))
 	ecode := C.git_reference_set_target(v.git_reference, ctarget)
@@ -284,10 +285,10 @@ func (v *Reference) Type() {
 	}
 }
 
-func (v *Reference) GetOid() (*Oid, os.Error) {
+func (v *Reference) GetOid() (*Oid, error) {
 	oid := C.git_reference_oid(v.git_reference)
 	if oid == nil {
-		return nil, os.NewError("GetOid Failed: unable to get Oid for reference")
+		return nil, errors.New("GetOid Failed: unable to get Oid for reference")
 	}
 	return &Oid{oid}, nil
 }
@@ -297,15 +298,15 @@ type Index struct {
 	git_index *C.git_index
 }
 
-func (v *Index) Open(repo *Repo) (err os.Error) {
+func (v *Index) Open(repo *Repo) (err error) {
 	if ecode := C.git_index_open_inrepo(&v.git_index, repo.git_repo); ecode != GIT_SUCCESS {
 		estring := fmt.Sprintf("failed to open index error code %v", ecode)
-		return os.NewError(estring)
+		return errors.New(estring)
 	}
 	return
 }
 
-func (v *Index) Add(file string) (err os.Error) {
+func (v *Index) Add(file string) (err error) {
 	s := C.CString(file)
 	defer C.free(unsafe.Pointer(s))
 	if C.git_index_add(v.git_index, s, 0) < GIT_SUCCESS {
@@ -314,14 +315,14 @@ func (v *Index) Add(file string) (err os.Error) {
 	return
 }
 
-func (v *Index) Read() (err os.Error) {
+func (v *Index) Read() (err error) {
 	if ecode := C.git_index_read(v.git_index); ecode != GIT_SUCCESS {
 		return LastError()
 	}
 	return
 }
 
-func (v *Index) Write() (err os.Error) {
+func (v *Index) Write() (err error) {
 	if ecode := C.git_index_write(v.git_index); ecode != GIT_SUCCESS {
 		return LastError()
 	}
@@ -332,11 +333,11 @@ func (v *Index) EntryCount() int {
 	return int(C.git_index_entrycount(v.git_index))
 }
 
-func (v *Index) Get(n int) (*IndexEntry, os.Error) {
+func (v *Index) Get(n int) (*IndexEntry, error) {
 	p := C.git_index_get(v.git_index, C.int(n))
 	if p == nil {
 		estring := fmt.Sprintf("Index %v not found, total index is %v", n, v.EntryCount())
-		return nil, os.NewError(estring)
+		return nil, errors.New(estring)
 	}
 	//entry := (*IndexEntry)(unsafe.Pointer(p))
 	return &IndexEntry{p}, nil
@@ -384,9 +385,9 @@ func NewSignature(name, email string) *Signature {
 }
 
 // Helper functions
-func LastError() os.Error {
+func LastError() error {
 	lasterror := C.GoString(C.git_lasterror())
-	return os.NewError(lasterror)
+	return errors.New(lasterror)
 }
 
 //Private
