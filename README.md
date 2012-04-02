@@ -8,16 +8,20 @@ Currently in active development.
 
 Documentation
 -----------------
-http://str1ngs.github.com/go-git
+http://gopkgdoc.appspot.com/pkg/github.com/str1ngs/go-git
 
+
+Requirements
+-----------------
+libgit2
+
+If your distro does not provide a libgit2 package you can build from go-git
+repo.
+
+	make libgit2-build
+	sudo make libgit2-install
 
 Installation
 ------------
-
-    sudo apt-get install libssl-dev # for libcypto dependency
-    hub clone str1ngs/go-git # if you don't have hub, see defunkt/hub
-                             # or use vanilla git.
-    cd go-git
-    make libgit2-build
-    sudo make libgit2-install
-    goinstall github.com/str1ngs/go-git/pkg/git
+    go get github.com/str1ngs/go-git
+	

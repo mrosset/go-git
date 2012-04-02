@@ -167,7 +167,7 @@ func TestRevWalk(t *testing.T) {
 		c := new(Commit)
 		c.Lookup(repo, o)
 		// Output example
-		//fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
+		fmt.Printf("%v %v %v %v\n", o.String(), c.Author(), c.Email(), c.Msg())
 	}
 }
 
