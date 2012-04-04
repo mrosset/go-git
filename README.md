@@ -14,6 +14,8 @@ Documentation
 Requirements
 -----------------
 libgit2 0.12.0
+pkg-config
+libssl-dev
 
 If your distro does not provide a libgit2 package you can build from go-git
 repo.
