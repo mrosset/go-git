@@ -8,18 +8,20 @@ Currently in active development.
 
 Documentation
 -----------------
-http://gopkgdoc.appspot.com/pkg/github.com/str1ngs/go-git
+[gopkgdoc go-git](http://gopkgdoc.appspot.com/pkg/github.com/str1ngs/go-git)
 
 
 Requirements
 -----------------
-libgit2 v0.12.0
+libgit2 0.12.0
 
 If your distro does not provide a libgit2 package you can build from go-git
 repo.
 
-	make libgit2-build
-	sudo make libgit2-install
+	git clone --recursive git://github.com/str1ngs/go-git.git
+	cd go-git/
+	make
+	sudo make install
 
 Installation
 ------------
