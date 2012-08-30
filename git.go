@@ -3,6 +3,7 @@ package git
 /*
 #cgo pkg-config: libgit2
 #include <git2.h>
+#include <git2/errors.h>
 */
 import "C"
 import (
@@ -15,6 +16,7 @@ import (
 const (
 	NOTBARE = iota
 	BARE
+	GIT_SUCCESS = 0
 )
 
 type Test *C.git_repository
@@ -52,7 +54,7 @@ type Tree struct {
 }
 
 func (t *Tree) Free() {
-	C.git_tree_close(t.git_tree)
+	C.git_tree_free(t.git_tree)
 }
 
 func TreeLookup(repo *Repo, oid *Oid) (*Tree, error) {
@@ -93,7 +95,7 @@ func (t *Tree) EntryByName(filename string) (*Entry, error) {
 
 func (t *Tree) EntryByIndex(index int) (*Entry, error) {
 	entry := new(Entry)
-	entry.git_tree_entry = C.git_tree_entry_byindex(t.git_tree, C.int(index))
+	entry.git_tree_entry = C.git_tree_entry_byindex(t.git_tree, C.uint(index))
 	if entry.git_tree_entry == nil {
 		return nil, errors.New("Unable to find entry.")
 	}
@@ -124,6 +126,7 @@ type Commit struct {
 	git_commit *C.git_commit
 }
 
+/*
 //TODO: do not use hardcoded update_ref
 func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, message string) error {
 	oid := NewOid()
@@ -146,6 +149,7 @@ func CommitCreate(repo *Repo, tree, parent *Oid, author, commiter *Signature, me
 	}
 	return nil
 }
+*/
 
 func (c *Commit) Lookup(r *Repo, o *Oid) (err error) {
 	ecode := C.git_commit_lookup(&c.git_commit, r.git_repo, o.git_oid)
@@ -180,7 +184,9 @@ func NewOid() *Oid {
 
 func NewOidString(s string) (*Oid, error) {
 	o := &Oid{new(C.git_oid)}
-	if C.git_oid_mkstr(o.git_oid, C.CString(s)) < GIT_SUCCESS {
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	if C.git_oid_fromstr(o.git_oid, cs) < GIT_SUCCESS {
 		return nil, LastError()
 	}
 	return o, nil
@@ -280,7 +286,7 @@ func (v *Reference) SetTarget(target string) (err error) {
 }
 
 func (v *Reference) Type() {
-	if C.git_reference_type(v.git_reference) == GIT_REF_SYMBOLIC {
+	if C.git_reference_type(v.git_reference) == C.GIT_REF_SYMBOLIC {
 		println("THIS IS A SYMBOLIC REF")
 	}
 }
@@ -298,12 +304,13 @@ type Index struct {
 	git_index *C.git_index
 }
 
-func (v *Index) Open(repo *Repo) (err error) {
-	if ecode := C.git_index_open_inrepo(&v.git_index, repo.git_repo); ecode != GIT_SUCCESS {
-		estring := fmt.Sprintf("failed to open index error code %v", ecode)
-		return errors.New(estring)
+func NewIndex(repo *Repo) (*Index, error) {
+	i := new(C.git_index)
+	ecode := C.git_repository_index(&i, repo.git_repo)
+	if ecode != GIT_SUCCESS {
+		return nil, LastError()
 	}
-	return
+	return &Index{i}, nil
 }
 
 func (v *Index) Add(file string) (err error) {
@@ -334,7 +341,7 @@ func (v *Index) EntryCount() int {
 }
 
 func (v *Index) Get(n int) (*IndexEntry, error) {
-	p := C.git_index_get(v.git_index, C.int(n))
+	p := C.git_index_get(v.git_index, C.uint(n))
 	if p == nil {
 		estring := fmt.Sprintf("Index %v not found, total index is %v", n, v.EntryCount())
 		return nil, errors.New(estring)
@@ -380,14 +387,16 @@ func NewSignature(name, email string) *Signature {
 	e := C.CString(email)
 	defer C.free(unsafe.Pointer(n))
 	defer C.free(unsafe.Pointer(e))
-	s := &Signature{C.git_signature_now(n, e)}
-	return s
+	gs := new(C.git_signature)
+	C.git_signature_now(&gs, n, e)
+	return &Signature{gs}
 }
 
 // Helper functions
 func LastError() error {
-	lasterror := C.GoString(C.git_lasterror())
-	return errors.New(lasterror)
+	ge := C.giterr_last()
+	msg := C.GoString(ge.message)
+	return errors.New(msg)
 }
 
 //Private
