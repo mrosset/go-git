@@ -13,9 +13,10 @@ Documentation
 
 Requirements
 -----------------
-libgit2 0.12.0
+libgit2 0.17.0
 pkg-config
 libssl-dev
+cmake
 
 If your distro does not provide a libgit2 package you can build from go-git
 repo.
