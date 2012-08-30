@@ -28,7 +28,7 @@ repo.
 Installation
 ------------
 	export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-    go get github.com/str1ngs/go-git
+	go get github.com/str1ngs/go-git
 
 Using
 ------------
