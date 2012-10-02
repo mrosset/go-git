@@ -95,7 +95,7 @@ func (t *Tree) EntryByName(filename string) (*Entry, error) {
 
 func (t *Tree) EntryByIndex(index int) (*Entry, error) {
 	entry := new(Entry)
-	entry.git_tree_entry = C.git_tree_entry_byindex(t.git_tree, C.uint(index))
+	entry.git_tree_entry = C.git_tree_entry_byindex(t.git_tree, C.size_t(index))
 	if entry.git_tree_entry == nil {
 		return nil, errors.New("Unable to find entry.")
 	}
@@ -341,7 +341,7 @@ func (v *Index) EntryCount() int {
 }
 
 func (v *Index) Get(n int) (*IndexEntry, error) {
-	p := C.git_index_get(v.git_index, C.uint(n))
+	p := C.git_index_get(v.git_index, C.size_t(n))
 	if p == nil {
 		estring := fmt.Sprintf("Index %v not found, total index is %v", n, v.EntryCount())
 		return nil, errors.New(estring)
